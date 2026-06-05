@@ -1,0 +1,24 @@
+import express from "express";
+import authRoute from "./auth.route.js";
+import adminRouter from "./admin.route.js";
+import vendorRouter from "./vendor.route.js";
+import customerRouter from "./customer.route.js";
+import cartRouter from "./cart.route.js";
+import addressRouter from "./address.route.js";
+import orderRouter from "./order.route.js";
+import reviewRouter from "./review.route.js";
+import paymentRouter from "./payment.route.js";
+
+const router = express.Router();
+
+router.use("/auth", authRoute);
+router.use("/admin", adminRouter);
+router.use("/vendor", vendorRouter);
+router.use("/customer", customerRouter);
+router.use("/cart", cartRouter);
+router.use("/address", addressRouter);
+router.use("/order", orderRouter);
+router.use("/review", reviewRouter);
+router.use("/payment", paymentRouter);
+
+export default router;
