@@ -36,7 +36,7 @@ const URI = process.env.MONGODB_URI;
 const connectMongo = async function () {
   try {
     const response = await mongoose.connect(URI);
-    mdb = mongoose.connection.db;
+    mdb = await mongoose.connection.db;
     console.log("db connected", mdb.databaseName);
     // mdb./;
   } catch (error) {

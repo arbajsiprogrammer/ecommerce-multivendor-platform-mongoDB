@@ -1,5 +1,6 @@
+import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
-import { db } from "../util/db.util.js";
+import { db, mdb } from "../util/db.util.js";
 
 // categories
 const getAllCategories = async function (req, res) {
@@ -8,12 +9,13 @@ const getAllCategories = async function (req, res) {
 
     console.log(role, "inside get all categories...");
 
-    if (role !== "admin") {
+    if (role != "admin") {
       logger.error("user must be admin to access categories");
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    const [categories] = await db.execute(`select * from categories`);
+    // const [categories] = await db.execute(`select * from categories`);
+    const categories = await mdb.collection("categories").find({}).toArray();
 
     console.log(categories, "inside categories..");
     logger.info("categories fetched successfully");
@@ -37,10 +39,13 @@ const getCategory = async function (req, res) {
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    const [category] = await db.execute(
-      `select * from categories where id = ?`,
-      [categoryId],
-    );
+    const category = await mdb
+      .collection("categories")
+      .findOne({ _id: new ObjectId(categoryId) });
+
+    if (!category) {
+      return res.status(400).json({ message: " category not found " });
+    }
 
     logger.info("category fetched successfully");
     console.log(category, "inside get category..");
@@ -64,25 +69,28 @@ const updateCategory = async function (req, res) {
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    const [existing_category] = await db.execute(
-      `select * from categories where id = ?`,
-      [categoryId],
-    );
-    console.log(existing_category, "inside get category..");
+    const existingCategory = await mdb
+      .collection("categories")
+      .findOne({ _id: new ObjectId(categoryId) });
 
-    if (existing_category.length == 0) {
+    console.log(existingCategory, "inside get category..");
+
+    if (!existingCategory) {
       logger.error("category not found with id: " + categoryId);
       return res.status(400).json({ message: "category not found " });
     }
-    const [row] = await db.execute(
-      `update categories set category_name = ?, parent_category_id = ? where id = ?`,
-      [
-        category.category_name,
-        category.parent_category_id || existing_category[0].parent_category_id,
-        categoryId,
-      ],
+
+    const row = await mdb.collection("categories").updateOne(
+      { _id: existingCategory._id },
+      {
+        $set: {
+          categoryName: category.categoryName,
+          parentCategoryId:
+            category.parentCategoryId || existingCategory.parentCategoryId,
+        },
+      },
     );
-    logger.info("category updated successfully with id: " + categoryId);
+    logger.info(row, "category updated successfully with id: " + categoryId);
     return res.status(200).json(row);
   } catch (error) {
     logger.error("error updating category: " + error.message);
@@ -104,28 +112,30 @@ const addCategory = async function (req, res) {
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    const [existing_category] = await db.execute(
-      `select * from categories where category_name = ?`,
-      [category.category_name],
-    );
-    console.log(existing_category, "existing  category");
+    // const [existingCategory] = await db.execute(
+    //   `select * from categories where category_name = ?`,
+    //   [category.category_name],
+    // );
+    const existingCategory = await mdb
+      .collection("categories")
+      .findOne({ categoryName: category.categoryName });
+    console.log(existingCategory, "existing  category");
 
-    if (existing_category.length > 0) {
+    if (existingCategory) {
       logger.error(
-        "category already exists with name: " + category.category_name,
+        "category already exists with name: " + category.categoryName,
       );
       return res.status(400).json({ message: "category already exists" });
     }
 
-    const [row] = await db.execute(
-      `insert into categories (category_name, parent_category_id) values (?,?)`,
-      [category.category_name || "temp", category.parent_category_id || null],
-    );
+    const row = await mdb.collection("categories").insertOne(category);
 
     logger.info("category added successfully");
-    console.log(row, "row ");
+    console.log(row, " row ");
 
-    return res.status(200).json({ message: "category added successfully " });
+    return res
+      .status(200)
+      .json({ message: "category added successfully ", response: row });
   } catch (error) {
     logger.error("error adding category: " + error.message);
     return res.status(500).json({ message: " inside add category " + error });
@@ -144,25 +154,31 @@ const deleteCategory = async function (req, res) {
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    const [category] = await db.execute(
-      `select * from categories where id = ?`,
-      [categoryId],
-    );
+    // const [category] = await db.execute(
+    //   `select * from categories where id = ?`,
+    //   [categoryId],
+    // );
+    const existingCategory = await mdb
+      .collection("categories")
+      .findOne({ _id: new ObjectId(categoryId) });
 
-    if (category.length == 0) {
-      logger.error("category not found with id: " + categoryId);
+    if (!existingCategory) {
+      logger.error(" category not found with id: " + categoryId);
       return res.status(400).json({ message: " category not found " });
     }
 
-    console.log(category, "inside get category..");
+    console.log(existingCategory, "inside get category..");
 
-    const [row] = await db.execute(`delete from categories where id = ?`, [
-      categoryId,
-    ]);
+    // const [row] = await db.execute(`delete from categories where id = ?`, [
+    //   categoryId,
+    // ]);
+    const row = await mdb
+      .collection("categories")
+      .deleteOne({ _id: existingCategory._id });
 
     logger.info("category deleted successfully with id: " + categoryId);
 
-    return res.status(200).json(category);
+    return res.status(200).json({ message: "category deleted ", row });
   } catch (error) {
     logger.error("error deleting category: " + error.message);
     return res.status(500).json({ message: error.message });
