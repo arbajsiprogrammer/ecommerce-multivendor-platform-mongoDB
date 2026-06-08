@@ -2,18 +2,24 @@
 
 import { Logger } from "winston";
 import logger from "../service/log.service.js";
-import { db } from "../util/db.util.js";
+import { db, mdb } from "../util/db.util.js";
+import { ObjectId } from "mongodb";
 
-// GET cart products
+// GET cart items of a cart
 const getCartProducts = async function (req, res) {
   try {
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     console.log(customerId);
-    const [row] = await db.execute(
-      `select * from cart_items where cart_id = (select id from carts where customer_id = ${customerId}) `,
-    );
+    const cartItems = await mdb
+      .collection("carts")
+      .find({ customerId })
+      .toArray();
+
+    console.log("cartItems");
+    console.log(cartItems);
+
     logger.info(`Cart products fetched for customer id ${customerId}`);
-    return res.status(200).json({ cartItems: row });
+    return res.status(200).json({ cartItems });
   } catch (error) {
     logger.error(
       `Error fetching cart products for customer id ${customerId}: ${error}`,
@@ -26,26 +32,29 @@ const getCartProducts = async function (req, res) {
 // get single cart item
 const getCartItem = async function (req, res) {
   try {
-    const customerId = req.user.id;
-    const cart_item_id = req.params.id;
+    const customerId = req.user._id;
+    const cartItemId = req.params.cartItemId;
 
-    const [existing_cart_item] = await db.execute(
-      `select * from cart_items where id = ${cart_item_id}`,
-    );
-    if (existing_cart_item.length == 0) {
+    const existingCart = await mdb.collection("carts").findOne({ customerId });
+
+    if (!existingCart) {
       logger.warn(
-        `Cart item with id ${cart_item_id} not found for customer id ${customerId}`,
+        `Cart item with id ${cartItemId} not found for customer id ${customerId}`,
       );
+
       return res.status(400).json({ message: "Cart item not found" });
     }
     logger.info(
-      `Cart item with id ${cart_item_id} fetched for customer id ${customerId}`,
+      `Cart item with id ${cartItemId} fetched for customer id ${customerId}`,
     );
-    return res.status(200).json({ cartItem: existing_cart_item });
+
+    const cartItem = existingCart.cartItems.filter(
+      (item) => item.id == cartItemId,
+    );
+
+    return res.status(200).json({ cartItem });
   } catch (error) {
-    logger.error(
-      `Error fetching cart item with id ${cart_item_id} for customer id ${customerId}: ${error}`,
-    );
+    logger.error(`Error fetching cart item : ${error}`);
     console.log(error);
     return res.status(500).json({ message: error });
   }
@@ -54,37 +63,50 @@ const getCartItem = async function (req, res) {
 // add to cart
 const addToCart = async function (req, res) {
   try {
-    const customerId = req.user.id;
-    const { product_sku_id, quantity } = req.body;
+    const customerId = req.user._id;
 
-    let [cart] = await db.execute(
-      `select id from carts where customer_id = ${customerId}`,
-    );
-    console.log(cart, " cart id inside add to cart");
+    const cartItemId = req.body?.id || Date.now().toString();
+    const { productSkuId, quantity } = req.body;
+
+    const productId = req.params.productId;
+    const skuId = req.params.skuId;
+
+    let existingCart = await mdb.collection("carts").findOne({ customerId });
+
+    console.log(existingCart, " existingCart inside add to cart");
+
     // every customer have only one cart
     // if cart not exist
-    if (cart.length == 0) {
+    if (!existingCart) {
       logger.info(`Cart created for customer id ${customerId}`);
-      [cart] = await db.execute(
-        `insert into carts (customer_id) values (${customerId})`,
-      );
+      existingCart = await mdb
+        .collection("carts")
+        .insertOne({ customerId, cartItems: [] });
     }
 
     // check if product skus is available or not in the inventory
-    const [product_sku] = await db.execute(
-      `select * from product_skus where id = ${product_sku_id}`,
-    );
+    const product = await mdb
+      .collection("products")
+      .findOne({ _id: new ObjectId(productId) });
+    console.log("product");
+    console.log(product);
 
-    if (product_sku.length == 0) {
+    if (!product) {
       logger.warn(
-        `Product with SKU id ${product_sku_id} not found for customer id ${customerId}`,
+        `Product with  id ${productId} not found for customer id ${customerId}`,
       );
       return res.status(404).json({ message: "Product not found" });
     }
 
+    const productSku = product.productSkuses.filter(
+      (sku) => sku.id == skuId,
+    )[0];
+    console.log("productSku");
+    console.log(productSku);
+    // check if quantity is grater than the available stock or if product is out of stock
     if (
-      product_sku[0].current_stock < quantity ||
-      !product_sku[0].availability_status
+      productSku.availableStock < quantity ||
+      !productSku.availabilityStatus
     ) {
       logger.warn(
         `Product  is out of stock or quantity is greater than available stock`,
@@ -96,25 +118,42 @@ const addToCart = async function (req, res) {
     }
 
     // if current product sku is already exist
-    const [existing_product_sku] = await db.execute(
-      `select * from cart_items where cart_id = ${cart[0].id} and product_skus_id = ${product_sku_id}`,
-    );
+    let existingProductSku;
+    if (existingCart.cartItems && existingCart.cartItems.length > 0) {
+      existingProductSku = existingCart.cartItems.filter(
+        (item) => item.productSkusId == skuId,
+      );
+      console.log("**************existingProductSku****************");
+      console.log(existingProductSku);
+    }
 
-    if (existing_product_sku.length > 0) {
+    if (existingProductSku && existingProductSku.length > 0) {
       logger.warn(
-        `Product with SKU id ${product_sku_id} is already in cart for customer id ${customerId}`,
+        `Product with SKU id ${productSkuId} is already in cart for customer id ${customerId}`,
       );
       return res.status(400).json({ message: "Product is already in cart" });
     }
 
+    const newCartItems = [
+      ...existingCart.cartItems,
+      { id: cartItemId, productSkuId, quantity },
+    ];
+    console.log("newCartItems");
+    console.log(newCartItems);
     // add product sku
-    const [row] = await db.execute(
-      `insert into cart_items (cart_id, product_skus_id, quantity) values (?, ?, ?)`,
-      [cart[0].id, product_sku_id, quantity],
+    const response = await mdb.collection("carts").updateOne(
+      { customerId },
+      {
+        $set: {
+          cartItems: [...newCartItems],
+        },
+      },
     );
 
     logger.info(`Product added to cart `);
-    return res.status(200).json({ message: "Product added to cart", row });
+    console.log(await mdb.collection("carts").findOne({ customerId }));
+
+    return res.status(200).json({ message: "Product added to cart", response });
   } catch (error) {
     logger.error(`Error adding product to cart: ${error}`);
     console.log(error);
@@ -125,37 +164,51 @@ const addToCart = async function (req, res) {
 // update cart item
 const updateCartItems = async function (req, res) {
   try {
-    const customerId = req.user.id;
-    const cart_item_id = req.params.id;
-    const { product_skus_id, quantity, cart_id } = req.body;
+    const customerId = req.user._id;
+    const cartItemId = req.params.cartItemId;
+    const { productId, productSkuId, quantity } = req.body;
 
-    let [cart] = await db.execute(
-      `select * from carts where id = ${cart_id} and customer_id = ${customerId}`,
-    );
-    console.log(cart, " cart id inside update cart");
+    const cart = await mdb.collection("carts").findOne({ customerId });
+    console.log(" cart id inside update cart ");
+    console.log(cart);
+
+    const cartItems = cart?.cartItems;
+    console.log("cartItems");
+    console.log(cartItems);
+
     // every customer have only one cart
     // if cart not exist
-    if (cart.length == 0) {
+    if (!cart) {
       logger.warn(`Cart not found for customer id ${customerId}`);
       return res.status(404).json({ message: "Cart not found" });
     }
 
     // check if product skus is available or not in the inventory
-    const [product_sku] = await db.execute(
-      `select * from product_skus where id = ${product_skus_id}`,
-    );
+    const product = await mdb
+      .collection("products")
+      .findOne({ _id: new ObjectId(productId) });
+    console.log("product");
+    console.log(product);
 
-    if (product_sku.length == 0) {
-      logger.warn(`Product not found`);
+    if (!product) {
+      logger.warn(
+        `Product with  id ${productId} not found for customer id ${customerId}`,
+      );
       return res.status(404).json({ message: "Product not found" });
     }
 
+    const productSku = product.productSkuses.filter(
+      (sku) => sku.id == productSkuId,
+    )[0];
+    console.log("productSku");
+    console.log(productSku);
+    // check if quantity is grater than the available stock or if product is out of stock
     if (
-      product_sku[0].current_stock < quantity ||
-      !product_sku[0].availability_status
+      productSku.availableStock < quantity ||
+      !productSku.availabilityStatus
     ) {
       logger.warn(
-        `Product is out of stock or quantity is greater than available stock`,
+        `Product  is out of stock or quantity is greater than available stock`,
       );
       return res.status(400).json({
         message:
@@ -163,25 +216,25 @@ const updateCartItems = async function (req, res) {
       });
     }
 
-    // if current product sku is already exist
-    const [existing_product_sku] = await db.execute(
-      `select * from cart_items where cart_id = ${cart[0].id} and product_skus_id = ${product_skus_id}`,
+    const newCartItems = cartItems.map((item) => {
+      if (item.id == cartItemId) {
+        const newItem = { ...item, quantity: quantity };
+        return newItem;
+      } else {
+        return item;
+      }
+    });
+
+    // update the cart Items
+    const response = await mdb.collection("carts").updateOne(
+      { customerId },
+      {
+        $set: { cartItems: newCartItems },
+      },
     );
 
-    if (existing_product_sku.length == 0) {
-      logger.warn(
-        `Product with SKU id ${product_skus_id} not found in cart for customer id ${customerId}`,
-      );
-      return res.status(400).json({ message: "Product not found in cart" });
-    }
-
-    // update product sku quantity
-    const [row] = await db.execute(
-      `update cart_items set quantity = ? where cart_id = ? and product_skus_id = ?`,
-      [quantity, cart_item_id, product_skus_id],
-    );
     logger.info(`Cart item updated for customer id ${customerId}`);
-    return res.status(200).json({ message: "Product updated", row });
+    return res.status(200).json({ message: "Product updated", response });
   } catch (error) {
     logger.error(`Error updating cart item: ${error}`);
     console.log(error);
@@ -192,23 +245,39 @@ const updateCartItems = async function (req, res) {
 // DELETE cart item
 const deleteCartItems = async function (req, res) {
   try {
-    const customerId = req.user.id;
-    const { cart_item_id } = req.body;
+    const customerId = req.user._id;
+    const cartItemId = req.params.cartItemId;
 
-    const [existing_cart_item] = await db.execute(
-      `select * from cart_items where id = ${cart_item_id}`,
-    );
-    if (existing_cart_item.length == 0) {
-      return res.status(404).json({ message: "Cart item not found" });
+    const existingCart = await mdb.collection("carts").findOne({ customerId });
+
+    if (!existingCart) {
+      logger.warn(
+        `Cart item with id ${cartItemId} not found for customer id ${customerId}`,
+      );
+
+      return res.status(400).json({ message: "Cart item not found" });
     }
 
-    const [row] = await db.execute(
-      `delete from cart_items where id = ${cart_item_id}`,
-    );
     logger.info(
-      `Cart item with id ${cart_item_id} deleted for customer id ${customerId}`,
+      `Cart item with id ${cartItemId} fetched for customer id ${customerId}`,
     );
-    return res.status(200).json({ message: "Cart item deleted", row });
+
+    const cartItem = existingCart.cartItems.filter(
+      (item) => item.id == cartItemId,
+    );
+
+    const cartItems = existingCart.cartItems.filter(
+      (item) => item.id != cartItemId,
+    );
+
+    const response = await mdb.collection("carts").updateOne(
+      { customerId },
+      {
+        $set: { cartItems: cartItems },
+      },
+    );
+
+    return res.status(200).json(response);
   } catch (error) {
     logger.error(`Error deleting cart item: ${error}`);
     console.log(error);
