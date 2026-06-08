@@ -13,9 +13,15 @@ const signup = async function (req, res) {
   try {
     const user = req.body;
     console.log(req.body, "inside signup function...");
-
+    const testUser = {
+      phoneNumber: user.phoneNumber,
+      password: user.password,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    };
     // validating the input
-    const result = authSchema.validate(user);
+    const result = authSchema.validate(testUser);
 
     if (result.error) {
       logger.error(result.error.details[0].message + " in signup function");

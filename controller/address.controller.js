@@ -1,5 +1,6 @@
+import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
-import { db } from "../util/db.util.js";
+import { db, mdb } from "../util/db.util.js";
 
 // add pickup address
 const addPickupAddress = async function (req, res) {
@@ -37,7 +38,7 @@ const addPickupAddress = async function (req, res) {
 // get pickup address
 const getPickupAddress = async function (req, res) {
   try {
-    const vendorId = req.user.id;
+    const vendorId = req.user._id;
     const role = req.user.role;
 
     if (role !== "vendor") {
@@ -48,14 +49,18 @@ const getPickupAddress = async function (req, res) {
         .status(403)
         .json({ message: "Only vendor can get pickup address" });
     }
-    const [rows] = await db.execute(
-      "SELECT * FROM pickup_address WHERE vendor_id = ?",
-      [vendorId],
-    );
+
+    const vendorData = await mdb
+      .collection("vendors")
+      .findOne({ _id: new ObjectId(vendorId) });
+    const pickupAddress = vendorData.pickupAddresses;
+    console.log("pickupAddress");
+    console.log(pickupAddress);
     logger.info(
       `Pickup addresses retrieved successfully for vendor with id ${vendorId}`,
-    ); // Log successful retrieval of pickup addresses
-    return res.status(200).json({ pickup_addresses: rows });
+    );
+    // Log successful retrieval of pickup addresses
+    return res.status(200).json(pickupAddress);
   } catch (error) {
     logger.error(`Error retrieving pickup addresses: ${error.message}`); // Log error message
     console.error(error);
