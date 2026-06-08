@@ -196,8 +196,9 @@ const getAllVendors = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const [vendors] = await db.execute(`select * from vendors`);
-    logger.info("vendor data fetched");
+    const vendors = await mdb.collection("vendors").find({}).toArray();
+
+    logger.info(" vendor data fetched ");
     return res.status(200).json(vendors);
   } catch (error) {
     logger.error("error getting all vendors : " + error.message);
@@ -215,7 +216,8 @@ const getAllCustomers = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const [customers] = await db.execute(`select * from customers`);
+    const customers = await mdb.collection("customers").find({}).toArray();
+
     logger.info("customers data fetched");
     return res.status(200).json(customers);
   } catch (error) {
@@ -234,7 +236,8 @@ const getAllOrders = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const [orders] = await db.execute(`select * from orders`);
+    const orders = await mdb.collection("orders").find({}).toArray();
+
     logger.info("orders data fetched");
     return res.status(200).json(orders);
   } catch (error) {
@@ -253,7 +256,8 @@ const getAllPayments = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const [payments] = await db.execute(`select * from payments`);
+    const payments = await mdb.collection("payments").find({}).toArray();
+
     logger.info("payments data fetched");
     return res.status(200).json(payments);
   } catch (error) {

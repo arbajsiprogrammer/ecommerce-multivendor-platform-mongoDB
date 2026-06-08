@@ -24,7 +24,7 @@ const verifyAuthToken = async (req, res, next) => {
 
     if (user) {
       req.user = user;
-      req.userId = user.id;
+      req.userId = user._id;
       return next();
     }
     const refreshToken = req.cookies.refreshToken;
@@ -42,16 +42,18 @@ const verifyAuthToken = async (req, res, next) => {
         .json({ message: "invalid credentials...refresh token is invalid" });
     }
     const newAccessToken = await generateToken({
-      id: refreshUser.id,
+      _id: refreshUser._id,
       role: refreshUser.role,
       phone_number: refreshUser.phone_number,
     });
+
     if (newAccessToken) {
       res.cookie("token", newAccessToken, {
         httpOnly: true,
         secure: true,
         maxAge: 1000 * 60 * 10, // 10 minutes
       });
+
       logger.info("new Token generation successful");
     } else {
       logger.error("new Token generation failed");
