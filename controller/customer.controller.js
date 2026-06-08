@@ -1,16 +1,14 @@
 import logger from "../service/log.service.js";
-import { db } from "../util/db.util.js";
+import { db, mdb } from "../util/db.util.js";
 
 const getAllProducts = async function (req, res) {
   try {
     const role = req.user.role;
-    const phone_number = req.user.phone_number;
-    const customerId = req.user.id;
-
-    let products;
+    const phoneNumber = req.user.phoneNumber;
+    const customerId = req.user._id;
 
     // showing all products
-    [products] = await db.execute(`select * from products`);
+    const products = await mdb.collection("products").find({}).toArray();
 
     console.log(products, " all products ");
     logger.info(`fetched all products`);
@@ -25,7 +23,7 @@ const getAllProducts = async function (req, res) {
 const getProduct = async function (req, res) {
   try {
     const role = req.user.role;
-    const phone_number = req.user.phone_number;
+    const phoneNumber = req.user.phoneNumber;
     const userId = req.user.id;
     const productId = req.params.id;
 
