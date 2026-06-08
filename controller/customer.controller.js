@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 
@@ -24,15 +25,13 @@ const getProduct = async function (req, res) {
   try {
     const role = req.user.role;
     const phoneNumber = req.user.phoneNumber;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const productId = req.params.id;
 
-    let products;
-
-    // showing only the vendors product
-    [products] = await db.execute(`select * from products where id = ?`, [
-      productId,
-    ]);
+    // showing only one product
+    const products = await mdb
+      .collection("products")
+      .findOne({ _id: new ObjectId(productId) });
 
     console.log(products, " product ");
     logger.info(`fetched product with id ${productId}`);
@@ -55,13 +54,14 @@ const getProductsByCategory = async function (req, res) {
       logger.warn(`Category ID not provided in request`);
       return res.status(400).json({ message: "category ID not found" });
     }
-
-    const [row] = await db.execute(
-      `select * from products where category_id = ?`,
-      [categoryId],
-    );
+    const products = await mdb
+      .collection("products")
+      .find({ categoryId: Number(categoryId) })
+      .toArray();
+    console.log("products");
+    console.log(products);
     logger.info(`fetched products for category ID ${categoryId}`);
-    return res.status(200).json(row);
+    return res.status(200).json(products);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "error : " + error });
@@ -76,15 +76,18 @@ const getProductsByPage = async function (req, res) {
     const offset = (page - 1) * limit;
     console.log(typeof page, typeof limit, typeof offset);
 
-    const [row] = await db.execute(
-      `select * from products
-      limit ${limit} offset ${offset}`,
-    );
+    const products = await mdb
+      .collection("products")
+      .aggregate([{ $skip: offset }, { $limit: limit }])
+      .toArray();
+
+    console.log("products");
+    console.log(products);
 
     logger.info(`fetched products for page ${page} with limit ${limit}`);
-    return res.status(200).json(row);
+    return res.status(200).json(products);
   } catch (error) {
-    logger.error(`Error fetching products for page ${page}: ${error.message}`);
+    logger.error(`Error fetching products for page : ${error.message}`);
     console.log(error);
     return res.status(500).json({ message: error });
   }

@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 // pagination for products
-router.get("/products", verifyAuthToken, getProductsByPage);
+router.get("/products/pagination", verifyAuthToken, getProductsByPage);
 // get all products
 router.get("/products", verifyAuthToken, getAllProducts);
 // get product by id
