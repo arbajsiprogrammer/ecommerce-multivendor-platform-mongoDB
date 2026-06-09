@@ -5,9 +5,10 @@ import { db, mdb } from "../util/db.util.js";
 // add pickup address
 const addPickupAddress = async function (req, res) {
   try {
-    const { address, state, city, pin_code } = req.body;
+    const { address, state, city, pinCode } = req.body;
+    const addressId = req.body.id || Date.now().toString();
 
-    const vendorId = req.user.id;
+    const vendorId = req.user._id;
     const role = req.user.role;
 
     if (role !== "vendor") {
@@ -18,10 +19,26 @@ const addPickupAddress = async function (req, res) {
         .status(403)
         .json({ message: "Only vendor can add pickup address" });
     }
-    const [row] = await db.execute(
-      "INSERT INTO pickup_address (vendor_id, address, state, city, pin_code) VALUES (?, ?, ?, ?, ?)",
-      [vendorId, address, state, city, pin_code],
-    );
+    const vendorData = await mdb
+      .collection("vendors")
+      .findOne({ _id: new ObjectId(vendorId) });
+
+    const pickupAddress = vendorData.pickupAddresses;
+    pickupAddress.push({ ...req.body, id: addressId });
+
+    console.log("pickupAddress");
+    console.log(pickupAddress);
+
+    const response = await mdb
+      .collection("vendors")
+      .updateOne(
+        { _id: new ObjectId(vendorId) },
+        { $set: { pickupAddresses: pickupAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
       `Pickup address added successfully for vendor with id ${vendorId}`,
     ); // Log successful addition of pickup address
@@ -71,9 +88,10 @@ const getPickupAddress = async function (req, res) {
 // update pickup address
 const updatePickupAddress = async function (req, res) {
   try {
-    const { address, state, city, pin_code } = req.body;
+    const { address, state, city, pinCode } = req.body;
+    const addressId = req.body.id || Date.now().toString();
 
-    const vendorId = req.user.id;
+    const vendorId = req.user._id;
     const role = req.user.role;
     const pickupAddressId = req.params.id;
 
@@ -81,14 +99,39 @@ const updatePickupAddress = async function (req, res) {
       logger.warn(
         `User with id ${vendorId} and role ${role} tried to update pickup address with id ${pickupAddressId}`,
       );
+
       return res
         .status(403)
         .json({ message: "Only vendor can update pickup address" });
     }
-    const [row] = await db.execute(
-      "UPDATE pickup_address SET address = ?, state = ?, city = ?, pin_code = ? WHERE vendor_id = ? AND id = ?",
-      [address, state, city, pin_code, vendorId, pickupAddressId],
-    );
+
+    const vendorData = await mdb
+      .collection("vendors")
+      .findOne({ _id: new ObjectId(vendorId) });
+
+    const pickupAddress = vendorData.pickupAddresses;
+
+    const newPickupAddress = pickupAddress.map((address) => {
+      if (address.id == pickupAddressId) {
+        return { id: address.id, ...req.body };
+      } else {
+        return address;
+      }
+    });
+
+    console.log("pickupAddress");
+    console.log(pickupAddress);
+
+    const response = await mdb
+      .collection("vendors")
+      .updateOne(
+        { _id: new ObjectId(vendorId) },
+        { $set: { pickupAddresses: newPickupAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
       `Pickup address with id ${pickupAddressId} updated successfully for vendor with id ${vendorId}`,
     ); // Log successful update of pickup address
@@ -105,18 +148,38 @@ const updatePickupAddress = async function (req, res) {
 // delete pickup address
 const deletePickupAddress = async function (req, res) {
   try {
-    const vendorId = req.user.id;
+    const vendorId = req.user._id;
     const role = req.user.role;
     const pickupAddressId = req.params.id;
-    if (role !== "vendor") {
+
+    if (role != "vendor" && role != "admin") {
       return res
         .status(403)
         .json({ message: "Only vendor can delete pickup address" });
     }
-    const [row] = await db.execute(
-      "DELETE FROM pickup_address WHERE vendor_id = ? AND id = ?",
-      [vendorId, pickupAddressId],
+    const vendorData = await mdb
+      .collection("vendors")
+      .findOne({ _id: new ObjectId(vendorId) });
+
+    const pickupAddress = vendorData.pickupAddresses;
+
+    const newPickupAddress = pickupAddress.filter(
+      (address) => address.id != pickupAddressId,
     );
+
+    console.log("newPickupAddress");
+    console.log(newPickupAddress);
+
+    const response = await mdb
+      .collection("vendors")
+      .updateOne(
+        { _id: new ObjectId(vendorId) },
+        { $set: { pickupAddresses: newPickupAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
       `Pickup address with id ${pickupAddressId} deleted successfully for vendor with id ${vendorId}`,
     ); // Log successful deletion of pickup address
@@ -134,9 +197,10 @@ const deletePickupAddress = async function (req, res) {
 // add delivery address
 const addDeliveryAddress = async function (req, res) {
   try {
-    const { address, state, city, pin_code } = req.body;
+    const { address, state, city, pinCode } = req.body;
+    const addressId = req.body.id || Date.now().toString();
 
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     const role = req.user.role;
 
     if (role !== "customer") {
@@ -147,10 +211,26 @@ const addDeliveryAddress = async function (req, res) {
         .status(403)
         .json({ message: "Only customer can add delivery address" });
     }
-    const [row] = await db.execute(
-      "INSERT INTO delivery_address (customer_id, address, state, city, pin_code) VALUES (?, ?, ?, ?, ?)",
-      [customerId, address, state, city, pin_code],
-    );
+    const customerData = await mdb
+      .collection("customers")
+      .findOne({ _id: new ObjectId(customerId) });
+
+    const deliveryAddress = customerData.deliveryAddresses;
+    deliveryAddress.push({ id: addressId, ...req.body });
+
+    console.log("deliveryAddress");
+    console.log(deliveryAddress);
+
+    const response = await mdb
+      .collection("customers")
+      .updateOne(
+        { _id: new ObjectId(customerId) },
+        { $set: { deliveryAddresses: deliveryAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
       `Delivery address added successfully for customer with id ${customerId}`,
     ); // Log successful addition of delivery address
@@ -167,10 +247,10 @@ const addDeliveryAddress = async function (req, res) {
 // get delivery address
 const getDeliveryAddress = async function (req, res) {
   try {
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     const role = req.user.role;
 
-    if (role != "customer") {
+    if (role != "customer" && role != "admin") {
       logger.warn(
         `User with id ${customerId} and role ${role} tried to get delivery address`,
       );
@@ -178,14 +258,19 @@ const getDeliveryAddress = async function (req, res) {
         .status(403)
         .json({ message: "Only customer can get delivery address" });
     }
-    const [rows] = await db.execute(
-      "SELECT * FROM delivery_address WHERE customer_id = ?",
-      [customerId],
-    );
+
+    const customerData = await mdb
+      .collection("customers")
+      .findOne({ _id: new ObjectId(customerId) });
+    const deliveryAddress = customerData.deliveryAddresses;
+
+    console.log("deliveryAddress");
+    console.log(deliveryAddress);
+
     logger.info(
       `Delivery addresses retrieved successfully for customer with id ${customerId}`,
     ); // Log successful retrieval of delivery addresses
-    return res.status(200).json({ delivery_addresses: rows });
+    return res.status(200).json(deliveryAddress);
   } catch (error) {
     logger.error(`Error retrieving delivery addresses: ${error.message}`); // Log error message
     console.error(error);
@@ -196,31 +281,56 @@ const getDeliveryAddress = async function (req, res) {
 // update delivery address
 const updateDeliveryAddress = async function (req, res) {
   try {
-    const { address, state, city, pin_code } = req.body;
+    const { address, state, city, pinCode } = req.body;
+    const addressId = req.body.id || Date.now().toString();
 
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     const role = req.user.role;
     const deliveryAddressId = req.params.id;
-    if (role != "customer") {
+
+    if (role !== "customer") {
       logger.warn(
-        `User with id ${customerId} and role ${role} tried to update delivery address with id ${deliveryAddressId}`,
+        `User with id ${customerId} and role ${role} tried to add delivery address`,
       );
       return res
         .status(403)
-        .json({ message: "Only customer can update delivery address" });
+        .json({ message: "Only customer can add delivery address" });
     }
-    const [row] = await db.execute(
-      "UPDATE delivery_address SET address = ?, state = ?, city = ?, pin_code = ? WHERE customer_id = ? AND id = ?",
-      [address, state, city, pin_code, customerId, deliveryAddressId],
-    );
+    const customerData = await mdb
+      .collection("customers")
+      .findOne({ _id: new ObjectId(customerId) });
+
+    const deliveryAddress = customerData.deliveryAddresses;
+    // deliveryAddress.push({ id: addressId, ...req.body });
+    const newDeliveryAddress = deliveryAddress.map((address) => {
+      if (address.id == deliveryAddressId) {
+        return { id: address.id, ...req.body };
+      } else {
+        return address;
+      }
+    });
+
+    console.log("deliveryAddress");
+    console.log(deliveryAddress);
+
+    const response = await mdb
+      .collection("customers")
+      .updateOne(
+        { _id: new ObjectId(customerId) },
+        { $set: { deliveryAddresses: newDeliveryAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
-      `Delivery address with id ${deliveryAddressId} updated successfully for customer with id ${customerId}`,
-    ); // Log successful update of delivery address
+      `Delivery address added successfully for customer with id ${customerId}`,
+    ); // Log successful addition of delivery address
     return res
       .status(200)
-      .json({ message: "Delivery address updated successfully" });
+      .json({ message: "Delivery address added successfully" });
   } catch (error) {
-    logger.error(`Error updating delivery address: ${error.message}`); // Log error message
+    logger.error(`Error adding delivery address: ${error.message}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -229,37 +339,53 @@ const updateDeliveryAddress = async function (req, res) {
 // delete delivery address
 const deleteDeliveryAddress = async function (req, res) {
   try {
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     const role = req.user.role;
     const deliveryAddressId = req.params.id;
 
     if (role !== "customer") {
       logger.warn(
-        `User with id ${customerId} and role ${role} tried to delete delivery address with id ${deliveryAddressId}`,
+        `User with id ${customerId} and role ${role} tried to add delivery address`,
       );
       return res
         .status(403)
-        .json({ message: "Only customer can delete delivery address" });
+        .json({ message: "Only customer can add delivery address" });
     }
+    const customerData = await mdb
+      .collection("customers")
+      .findOne({ _id: new ObjectId(customerId) });
 
-    const [row] = await db.execute(
-      "DELETE FROM delivery_address WHERE customer_id = ? and id = ?",
-      [customerId, deliveryAddressId],
+    const deliveryAddress = customerData.deliveryAddresses;
+    // deliveryAddress.push({ id: addressId, ...req.body });
+    const newDeliveryAddress = deliveryAddress.filter(
+      (address) => address.id != deliveryAddressId,
     );
 
+    console.log("deliveryAddress");
+    console.log(deliveryAddress);
+
+    const response = await mdb
+      .collection("customers")
+      .updateOne(
+        { _id: new ObjectId(customerId) },
+        { $set: { deliveryAddresses: newDeliveryAddress } },
+      );
+
+    console.log("response");
+    console.log(response);
+
     logger.info(
-      `Delivery address with id ${deliveryAddressId} deleted successfully for customer with id ${customerId}`,
-    ); // Log successful deletion of delivery address
+      `Delivery address deleted successfully for customer with id ${customerId}`,
+    ); // Log successful addition of delivery address
     return res
       .status(200)
-      .json({ message: "Delivery address deleted successfully" });
+      .json({ message: "Delivery address added successfully" });
   } catch (error) {
-    logger.error(`Error deleting delivery address: ${error.message}`); // Log error message
+    logger.error(`Error adding delivery address: ${error.message}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
 };
-
 export {
   addPickupAddress,
   getPickupAddress,
