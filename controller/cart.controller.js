@@ -136,10 +136,11 @@ const addToCart = async function (req, res) {
 
     const newCartItems = [
       ...existingCart.cartItems,
-      { id: cartItemId, productSkuId, quantity },
+      { id: cartItemId, productId, productSkuId, quantity },
     ];
     console.log("newCartItems");
     console.log(newCartItems);
+
     // add product sku
     const response = await mdb.collection("carts").updateOne(
       { customerId },
