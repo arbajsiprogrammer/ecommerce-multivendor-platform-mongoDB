@@ -6,9 +6,12 @@ import { db, mdb } from "../util/db.util.js";
 // products API's
 const addProduct = async function (req, res) {
   try {
-    const product = req.body;
     const user = req.user;
     const userId = req.userId;
+
+    const product = req.body;
+    console.log("product");
+    console.log(product);
 
     if (!product) {
       logger.error("Product details missing in request body");
@@ -27,7 +30,9 @@ const addProduct = async function (req, res) {
       return res.status(400).json({ message: result.error.details[0].message });
     }
 
-    const row = await mdb.collection("products").insertOne(product);
+    const row = await mdb
+      .collection("products")
+      .insertOne({ vendorId: userId, ...product });
 
     logger.info(` Product added successfully : ${row}`);
     return res
@@ -43,20 +48,17 @@ const getAllProducts = async function (req, res) {
   try {
     const role = req.user.role;
     const phoneNumber = req.user.phoneNumber;
-    const id = req.user._id;
-    console.log(" id", id);
+    const vendorId = req.user._id;
+    console.log(" vendorId ", vendorId);
     let products;
 
     if (role == "vendor") {
-      products = await mdb
-        .collection("products")
-        .find({ vendorId: id })
-        .toArray();
+      products = await mdb.collection("products").find({ vendorId }).toArray();
     }
 
     console.log(products, " all products ");
     logger.info(
-      `Products retrieved successfully for user ID: ${id} with role: ${role}`,
+      `Products retrieved successfully for user ID: ${vendorId} with role: ${role}`,
     );
     return res.status(200).json(products);
   } catch (error) {
