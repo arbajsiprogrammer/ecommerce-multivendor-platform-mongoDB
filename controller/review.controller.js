@@ -1,21 +1,22 @@
+import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
-import { db } from "../util/db.util.js";
+import { db, mdb } from "../util/db.util.js";
 
 const addReview = async (req, res) => {
   try {
-    const customerId = req.user.id;
+    const customerId = req.user._id;
     const role = req.user.role;
-    const { product_id, product_skus_id, rating, review } = req.body;
-
-    // Check if the user has purchased the product
-    const [product] = await db.execute(
-      `select product_skus_id, order_id from order_items where order_id = any(select id from orders where customer_id = ?) and product_skus_id = ?`,
-      [customerId, product_skus_id],
-    );
+    console.log("req.body");
+    console.log(req.body);
+    const { productId, productSkusId, rating, review, orderId } = req.body;
+    const product = await mdb
+      .collection("orders")
+      .find({ _id: new ObjectId(orderId), customerId })
+      .toArray();
 
     if (product.length == 0) {
       logger.warn(
-        `Customer with id ${customerId} attempted to add a review for product ${product_id} without purchasing it.`,
+        `Customer with id ${customerId} attempted to add a review for product ${productId} without purchasing it.`,
       );
       return res
         .status(400)
@@ -23,21 +24,20 @@ const addReview = async (req, res) => {
     }
 
     // adding review
-    const [row] = await db.execute(
-      `insert into reviews (customer_id, product_id, product_skus_id, rating, review, order_id) values (?, ?, ?, ?, ?, ?)`,
-      [
-        customerId,
-        product_id,
-        product[0].product_skus_id,
-        rating,
-        review,
-        product[0].order_id,
-      ],
-    );
+    const response = await mdb.collection("reviews").insertOne({
+      customerId,
+      productId,
+      productSkusId,
+      rating,
+      review,
+      orderId,
+    });
+
     logger.info(
-      `Customer with id ${customerId} added a review for product ${product_id}. Review ID: ${row.insertId}`,
-    ); // Log the review addition
-    console.log(row, " review row inside addReview");
+      `Customer with id ${customerId} added a review for product ${productId}. Review ID: ${response.insertedId}`,
+    );
+    // Log the review addition
+    console.log(response, " review row inside addReview");
     return res.status(200).json({ message: "Review added successfully" });
   } catch (error) {
     logger.error(`Error in addReview: ${error.message}`);
@@ -48,20 +48,21 @@ const addReview = async (req, res) => {
 
 const getAllReviews = async (req, res) => {
   try {
-    const product_id = req.params.id;
+    const productId = req.params.productId;
 
-    const [reviews] = await db.execute(
-      `select * from reviews where product_id = ? or product_skus_id = ?`,
-      [product_id, product_id],
-    );
+    const reviews = await mdb
+      .collection("reviews")
+      .find({ productId })
+      .toArray();
+
     if (reviews.length == 0) {
-      logger.warn(`No reviews found for product with id ${product_id}.`);
+      logger.warn(`No reviews found for product with id ${productId}.`);
       return res.status(400).json({ message: "No reviews found " });
     }
     logger.info(
-      `Reviews retrieved successfully for product with id ${product_id}.`,
+      `Reviews retrieved successfully for product with id ${productId}.`,
     );
-    return res.status(200).json({ reviews });
+    return res.status(200).json(reviews);
   } catch (error) {
     logger.error(`Error in getAllReviews: ${error.message}`);
     console.error("Error in getAllReviews:", error);

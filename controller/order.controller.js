@@ -82,6 +82,7 @@ const addItemToOrder = async (req, res) => {
       const orderItem = {
         id: item.id || Date.now().toString(),
         vendorId,
+        productId,
         productSkusId: productSkuId,
         quantity: item.quantity,
         skuPriceSnapshot: productSku.price,
