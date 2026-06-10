@@ -5,6 +5,7 @@ import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
 } from "../Constants/authToken.constant.js";
+import logger from "./log.service.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ const verifyToken = async (token) => {
 };
 
 // generating JWT refresh token
+
 const generateRefreshToken = async (payload) => {
   return await jwt.sign(payload, refresh_secretKey, {
     expiresIn: REFRESH_TOKEN_EXPIRY,

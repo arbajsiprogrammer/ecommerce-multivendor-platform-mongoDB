@@ -8,6 +8,7 @@ const COLLECTION_NAMES = {
   PRODUCT: "products",
   REVIEW: "reviews",
   VENDOR: "vendors",
+  REFRESH_TOKEN: "refreshToken",
 };
 
 export default COLLECTION_NAMES;
