@@ -1,6 +1,10 @@
 import express from "express";
 import { verifyAuthToken } from "../middleware/auth.middleware.js";
-import { deleteUser, logout, profile } from "../controller/auth.controller.js";
+import {
+  deleteUser,
+  logout,
+  profile,
+} from "../controller/userProfile.controller.js";
 
 const router = express.Router();
 
