@@ -9,7 +9,10 @@ const getAllProducts = async function (req, res) {
     const customerId = req.user._id;
 
     // showing all products
-    const products = await mdb.collection("products").find({}).toArray();
+    const products = await mdb
+      .collection(COLLECTION_NAMES.PRODUCT)
+      .find({})
+      .toArray();
 
     console.log(products, " all products ");
     logger.info(`fetched all products`);
@@ -30,7 +33,7 @@ const getProduct = async function (req, res) {
 
     // showing only one product
     const products = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .findOne({ _id: new ObjectId(productId) });
 
     console.log(products, " product ");
@@ -55,7 +58,7 @@ const getProductsByCategory = async function (req, res) {
       return res.status(400).json({ message: "category ID not found" });
     }
     const products = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ categoryId: Number(categoryId) })
       .toArray();
     console.log("products");
@@ -77,7 +80,7 @@ const getProductsByPage = async function (req, res) {
     console.log(typeof page, typeof limit, typeof offset);
 
     const products = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .aggregate([{ $skip: offset }, { $limit: limit }])
       .toArray();
 

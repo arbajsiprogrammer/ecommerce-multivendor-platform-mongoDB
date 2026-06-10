@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
-} from "../Constants/authToken.consts.js";
+} from "../Constants/authToken.constant.js";
 
 dotenv.config();
 

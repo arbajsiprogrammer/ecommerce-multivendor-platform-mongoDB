@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
+import COLLECTION_NAMES from "../Constants/collectionName.constant.js";
 
 // categories
 const getAllCategories = async function (req, res) {
@@ -9,13 +10,17 @@ const getAllCategories = async function (req, res) {
 
     console.log(role, "inside get all categories...");
 
-    if (role != "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.error("user must be admin to access categories");
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    // const [categories] = await db.execute(`select * from categories`);
-    const categories = await mdb.collection("categories").find({}).toArray();
+    const categories = await mdb
+      .collection(COLLECTION_NAMES.CATEGORY)
+      .find({})
+      .toArray();
 
     console.log(categories, "inside categories..");
     logger.info("categories fetched successfully");
@@ -34,13 +39,15 @@ const getCategory = async function (req, res) {
 
     console.log(role, "inside get category...");
 
-    if (role !== "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.error("user must be admin to access category");
       return res.status(400).json({ message: "user must be admin" });
     }
 
     const category = await mdb
-      .collection("categories")
+      .collection(COLLECTION_NAMES.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     if (!category) {
@@ -64,13 +71,15 @@ const updateCategory = async function (req, res) {
     const categoryId = req.params.id;
 
     console.log(role, "inside get category...");
-    if (role !== "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.error("user must be admin to update category");
       return res.status(400).json({ message: "user must be admin" });
     }
 
     const existingCategory = await mdb
-      .collection("categories")
+      .collection(COLLECTION_NAMES.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     console.log(existingCategory, "inside get category..");
@@ -80,7 +89,7 @@ const updateCategory = async function (req, res) {
       return res.status(400).json({ message: "category not found " });
     }
 
-    const row = await mdb.collection("categories").updateOne(
+    const row = await mdb.collection(COLLECTION_NAMES.CATEGORY).updateOne(
       { _id: existingCategory._id },
       {
         $set: {
@@ -107,7 +116,9 @@ const addCategory = async function (req, res) {
 
     console.log(category, "inside add category ");
 
-    if (role != "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.error("user must be admin to add category");
       return res.status(400).json({ message: "user must be admin" });
     }
@@ -117,7 +128,7 @@ const addCategory = async function (req, res) {
     //   [category.category_name],
     // );
     const existingCategory = await mdb
-      .collection("categories")
+      .collection(COLLECTION_NAMES.CATEGORY)
       .findOne({ categoryName: category.categoryName });
     console.log(existingCategory, "existing  category");
 
@@ -128,7 +139,9 @@ const addCategory = async function (req, res) {
       return res.status(400).json({ message: "category already exists" });
     }
 
-    const row = await mdb.collection("categories").insertOne(category);
+    const row = await mdb
+      .collection(COLLECTION_NAMES.CATEGORY)
+      .insertOne(category);
 
     logger.info("category added successfully");
     console.log(row, " row ");
@@ -149,17 +162,15 @@ const deleteCategory = async function (req, res) {
 
     console.log(role, "inside get category...");
 
-    if (role !== "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.error("user must be admin to delete category");
       return res.status(400).json({ message: "user must be admin" });
     }
 
-    // const [category] = await db.execute(
-    //   `select * from categories where id = ?`,
-    //   [categoryId],
-    // );
     const existingCategory = await mdb
-      .collection("categories")
+      .collection(COLLECTION_NAMES.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     if (!existingCategory) {
@@ -169,16 +180,13 @@ const deleteCategory = async function (req, res) {
 
     console.log(existingCategory, "inside get category..");
 
-    // const [row] = await db.execute(`delete from categories where id = ?`, [
-    //   categoryId,
-    // ]);
-    const row = await mdb
-      .collection("categories")
+    const response = await mdb
+      .collection(COLLECTION_NAMES.CATEGORY)
       .deleteOne({ _id: existingCategory._id });
 
     logger.info("category deleted successfully with id: " + categoryId);
 
-    return res.status(200).json({ message: "category deleted ", row });
+    return res.status(200).json({ message: "category deleted ", response });
   } catch (error) {
     logger.error("error deleting category: " + error.message);
     return res.status(500).json({ message: error.message });
@@ -190,13 +198,17 @@ const getAllVendors = async function (req, res) {
   try {
     const role = req.user.role;
     const userId = req.userId;
+    const authRole = "admin";
 
-    if (role != "admin") {
+    if (role != authRole) {
       logger.warn(`user with id ${userId} tried to access getAllVendors`);
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const vendors = await mdb.collection("vendors").find({}).toArray();
+    const vendors = await mdb
+      .collection(COLLECTION_NAMES.VENDOR)
+      .find({})
+      .toArray();
 
     logger.info(" vendor data fetched ");
     return res.status(200).json(vendors);
@@ -211,12 +223,17 @@ const getAllCustomers = async function (req, res) {
     const role = req.user.role;
     const userId = req.userId;
 
-    if (role != "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.warn(`user with id ${userId} tried to access getAllCustomers`);
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const customers = await mdb.collection("customers").find({}).toArray();
+    const customers = await mdb
+      .collection(COLLECTION_NAMES.CUSTOMER)
+      .find({})
+      .toArray();
 
     logger.info("customers data fetched");
     return res.status(200).json(customers);
@@ -231,12 +248,17 @@ const getAllOrders = async function (req, res) {
     const role = req.user.role;
     const userId = req.userId;
 
-    if (role != "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.warn(`user with id ${userId} tried to access getAllOrders`);
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const orders = await mdb.collection("orders").find({}).toArray();
+    const orders = await mdb
+      .collection(COLLECTION_NAMES.ORDER)
+      .find({})
+      .toArray();
 
     logger.info("orders data fetched");
     return res.status(200).json(orders);
@@ -251,12 +273,17 @@ const getAllPayments = async function (req, res) {
     const role = req.user.role;
     const userId = req.userId;
 
-    if (role != "admin") {
+    const authRole = "admin";
+
+    if (role != authRole) {
       logger.warn(`user with id ${userId} tried to access getAllPayments`);
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const payments = await mdb.collection("payments").find({}).toArray();
+    const payments = await mdb
+      .collection(COLLECTION_NAMES.PAYMENT)
+      .find({})
+      .toArray();
 
     logger.info("payments data fetched");
     return res.status(200).json(payments);

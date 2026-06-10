@@ -31,7 +31,7 @@ const addProduct = async function (req, res) {
     }
 
     const row = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .insertOne({ vendorId: userId, ...product });
 
     logger.info(` Product added successfully : ${row}`);
@@ -53,7 +53,10 @@ const getAllProducts = async function (req, res) {
     let products;
 
     if (role == "vendor") {
-      products = await mdb.collection("products").find({ vendorId }).toArray();
+      products = await mdb
+        .collection(COLLECTION_NAMES.PRODUCT)
+        .find({ vendorId })
+        .toArray();
     }
 
     console.log(products, " all products ");
@@ -80,7 +83,7 @@ const getProduct = async function (req, res) {
 
     if (role == "vendor") {
       products = await mdb
-        .collection("products")
+        .collection(COLLECTION_NAMES.PRODUCT)
         .find({ vendorId: id, _id: new ObjectId(productId) })
         .toArray();
     }
@@ -107,7 +110,7 @@ const deleteProduct = async function (req, res) {
 
     if (role == "vendor") {
       products = await mdb
-        .collection("products")
+        .collection(COLLECTION_NAMES.PRODUCT)
         .findOne({ vendorId: id, _id: new ObjectId(productId) });
     }
 
@@ -124,7 +127,7 @@ const deleteProduct = async function (req, res) {
     }
 
     const response = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .deleteOne({ _id: new ObjectId(productId) });
 
     logger.info(
@@ -151,7 +154,7 @@ const updateProduct = async function (req, res) {
     if (role == "vendor") {
       // showing only the vendors product
       existingProducts = await mdb
-        .collection("products")
+        .collection(COLLECTION_NAMES.PRODUCT)
         .find({ vendorId: id, _id: new ObjectId(productId) });
     }
 
@@ -165,7 +168,7 @@ const updateProduct = async function (req, res) {
     }
 
     const response = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne({ _id: new ObjectId(productId) }, { $set: { ...product } });
 
     logger.info(
@@ -191,7 +194,7 @@ const getAllSKU = async function (req, res) {
 
     if (role == "vendor") {
       products = await mdb
-        .collection("products")
+        .collection(COLLECTION_NAMES.PRODUCT)
         .find({ _id: new ObjectId(id) })
         .toArray();
 
@@ -264,7 +267,7 @@ const addSKU = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -281,7 +284,7 @@ const addSKU = async function (req, res) {
     console.log(newProduct, " new product ");
 
     const response = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne({ _id: new ObjectId(productId) }, { $set: { ...newProduct } });
 
     logger.info(
@@ -323,7 +326,7 @@ const updateSKU = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -356,7 +359,7 @@ const updateSKU = async function (req, res) {
     console.log(updateProductSkus);
 
     const response = mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne(
         { _id: new ObjectId(productId) },
         { $set: { productSkuses: updateProductSkus } },
@@ -428,7 +431,7 @@ const deleteSKU = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -455,7 +458,7 @@ const deleteSKU = async function (req, res) {
     console.log(updateProductSkus);
 
     const response = mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne(
         { _id: new ObjectId(productId) },
         { $set: { productSkuses: updateProductSkus } },
@@ -497,7 +500,7 @@ const addImage = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -527,7 +530,7 @@ const addImage = async function (req, res) {
     logger.info(`sku images updated successfully for Product SKU ID: ${skuId}`);
 
     const response = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne(
         { _id: new ObjectId(productId) },
         { $set: { productSkuses: updatedSkus } },
@@ -560,7 +563,7 @@ const getImages = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -609,7 +612,7 @@ const deleteImage = async function (req, res) {
     }
 
     const existingProduct = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .find({ vendorId: id, _id: new ObjectId(productId) })
       .toArray();
 
@@ -638,7 +641,7 @@ const deleteImage = async function (req, res) {
     logger.info(`sku images updated successfully for Product SKU ID: ${skuId}`);
 
     const response = await mdb
-      .collection("products")
+      .collection(COLLECTION_NAMES.PRODUCT)
       .updateOne(
         { _id: new ObjectId(productId) },
         { $set: { productSkuses: updatedSkus } },
@@ -670,7 +673,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     const existingOrder = await mdb
-      .collection("orders")
+      .collection(COLLECTION_NAMES.ORDER)
       .findOne({ _id: new ObjectId(orderId) });
 
     if (!existingOrder) {
@@ -687,7 +690,7 @@ const updateOrderStatus = async (req, res) => {
     };
     newOrderTracks.push(newRecord);
 
-    const response = await mdb.collection("orders").updateOne(
+    const response = await mdb.collection(COLLECTION_NAMES.ORDER).updateOne(
       { _id: new ObjectId(orderId) },
       {
         $set: {

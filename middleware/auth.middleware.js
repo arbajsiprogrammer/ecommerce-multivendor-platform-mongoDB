@@ -4,7 +4,7 @@ import {
   verifyToken,
 } from "../service/auth.service.js";
 import logger from "../service/log.service.js";
-import { ACCESS_TOKEN_NAME } from "../Constants/authToken.consts.js";
+import { ACCESS_TOKEN_NAME } from "../Constants/authToken.constant.js";
 
 const verifyAuthToken = async (req, res, next) => {
   try {

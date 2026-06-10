@@ -20,7 +20,7 @@ const addPickupAddress = async function (req, res) {
         .json({ message: "Only vendor can add pickup address" });
     }
     const vendorData = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .findOne({ _id: new ObjectId(vendorId) });
 
     const pickupAddress = vendorData.pickupAddresses;
@@ -30,7 +30,7 @@ const addPickupAddress = async function (req, res) {
     console.log(pickupAddress);
 
     const response = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .updateOne(
         { _id: new ObjectId(vendorId) },
         { $set: { pickupAddresses: pickupAddress } },
@@ -68,7 +68,7 @@ const getPickupAddress = async function (req, res) {
     }
 
     const vendorData = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .findOne({ _id: new ObjectId(vendorId) });
     const pickupAddress = vendorData.pickupAddresses;
     console.log("pickupAddress");
@@ -106,7 +106,7 @@ const updatePickupAddress = async function (req, res) {
     }
 
     const vendorData = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .findOne({ _id: new ObjectId(vendorId) });
 
     const pickupAddress = vendorData.pickupAddresses;
@@ -123,7 +123,7 @@ const updatePickupAddress = async function (req, res) {
     console.log(pickupAddress);
 
     const response = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .updateOne(
         { _id: new ObjectId(vendorId) },
         { $set: { pickupAddresses: newPickupAddress } },
@@ -158,7 +158,7 @@ const deletePickupAddress = async function (req, res) {
         .json({ message: "Only vendor can delete pickup address" });
     }
     const vendorData = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .findOne({ _id: new ObjectId(vendorId) });
 
     const pickupAddress = vendorData.pickupAddresses;
@@ -171,7 +171,7 @@ const deletePickupAddress = async function (req, res) {
     console.log(newPickupAddress);
 
     const response = await mdb
-      .collection("vendors")
+      .collection(COLLECTION_NAMES.VENDOR)
       .updateOne(
         { _id: new ObjectId(vendorId) },
         { $set: { pickupAddresses: newPickupAddress } },
@@ -212,7 +212,7 @@ const addDeliveryAddress = async function (req, res) {
         .json({ message: "Only customer can add delivery address" });
     }
     const customerData = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .findOne({ _id: new ObjectId(customerId) });
 
     const deliveryAddress = customerData.deliveryAddresses;
@@ -222,7 +222,7 @@ const addDeliveryAddress = async function (req, res) {
     console.log(deliveryAddress);
 
     const response = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .updateOne(
         { _id: new ObjectId(customerId) },
         { $set: { deliveryAddresses: deliveryAddress } },
@@ -260,7 +260,7 @@ const getDeliveryAddress = async function (req, res) {
     }
 
     const customerData = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .findOne({ _id: new ObjectId(customerId) });
     const deliveryAddress = customerData.deliveryAddresses;
 
@@ -297,7 +297,7 @@ const updateDeliveryAddress = async function (req, res) {
         .json({ message: "Only customer can add delivery address" });
     }
     const customerData = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .findOne({ _id: new ObjectId(customerId) });
 
     const deliveryAddress = customerData.deliveryAddresses;
@@ -314,7 +314,7 @@ const updateDeliveryAddress = async function (req, res) {
     console.log(deliveryAddress);
 
     const response = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .updateOne(
         { _id: new ObjectId(customerId) },
         { $set: { deliveryAddresses: newDeliveryAddress } },
@@ -352,7 +352,7 @@ const deleteDeliveryAddress = async function (req, res) {
         .json({ message: "Only customer can add delivery address" });
     }
     const customerData = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .findOne({ _id: new ObjectId(customerId) });
 
     const deliveryAddress = customerData.deliveryAddresses;
@@ -365,7 +365,7 @@ const deleteDeliveryAddress = async function (req, res) {
     console.log(deliveryAddress);
 
     const response = await mdb
-      .collection("customers")
+      .collection(COLLECTION_NAMES.CUSTOMER)
       .updateOne(
         { _id: new ObjectId(customerId) },
         { $set: { deliveryAddresses: newDeliveryAddress } },

@@ -3,7 +3,7 @@ import {
   ACCESS_TOKEN_NAME,
   REFRESH_TOKEN_EXPIRY_OPTIONS,
   REFRESH_TOKEN_NAME,
-} from "../Constants/authToken.consts.js";
+} from "../Constants/authToken.constant.js";
 import { ROLES } from "../Constants/userRole.constant.js";
 import authSchema from "../model/authSchema.model.js";
 import {
