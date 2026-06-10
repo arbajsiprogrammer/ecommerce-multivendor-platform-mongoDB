@@ -4,6 +4,7 @@ import {
   REFRESH_TOKEN_EXPIRY_OPTIONS,
   REFRESH_TOKEN_NAME,
 } from "../Constants/authToken.consts.js";
+import { ROLES } from "../Constants/userRole.constant.js";
 import authSchema from "../model/authSchema.model.js";
 import {
   generateRefreshToken,
@@ -68,6 +69,13 @@ const login = async function (req, res) {
   try {
     const { phoneNumber, password, role } = req.body;
 
+    // check if role is valid or not
+    const validRole = ROLES.includes(role);
+    if (!validRole) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
     const existingUser = await mdb
       .collection(`${role}s`)
       .findOne({ phoneNumber });

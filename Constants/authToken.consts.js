@@ -1,21 +1,30 @@
-export const ACCESS_TOKEN_NAME = "access-token";
+const ACCESS_TOKEN_NAME = "access-token";
 
-export const REFRESH_TOKEN_NAME = "refresh-token";
+const REFRESH_TOKEN_NAME = "refresh-token";
 
-export const ACCESS_TOKEN_EXPIRY = "10m";
+const ACCESS_TOKEN_EXPIRY = "10m";
 
-export const REFRESH_TOKEN_EXPIRY = "7d";
+const REFRESH_TOKEN_EXPIRY = "7d";
 
-export const ACCESS_TOKEN_EXPIRY_OPTIONS = {
+const ACCESS_TOKEN_EXPIRY_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "strict",
   maxAge: 1000 * 60 * 10, // 10 minutes
 };
 
-export const REFRESH_TOKEN_EXPIRY_OPTIONS = {
+const REFRESH_TOKEN_EXPIRY_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "strict",
   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+};
+
+export {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+  ACCESS_TOKEN_EXPIRY,
+  REFRESH_TOKEN_EXPIRY,
+  ACCESS_TOKEN_EXPIRY_OPTIONS,
+  REFRESH_TOKEN_EXPIRY_OPTIONS,
 };
