@@ -8,12 +8,12 @@ import addressRouter from "./address.route.js";
 import orderRouter from "./order.route.js";
 import reviewRouter from "./review.route.js";
 import paymentRouter from "./payment.route.js";
-import profileRouter from "./profile.route.js";
+import userProfileRouter from "./userProfile.route.js";
 
 const router = express.Router();
 
 router.use("/auth", authRoute);
-router.use("/profile", profileRouter);
+router.use("/user-profile", userProfileRouter);
 router.use("/admin", adminRouter);
 router.use("/vendor", vendorRouter);
 router.use("/customer", customerRouter);

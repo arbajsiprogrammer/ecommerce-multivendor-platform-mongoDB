@@ -8,6 +8,6 @@ router.post("/logout", verifyAuthToken, logout);
 
 router.delete("/delete", verifyAuthToken, deleteUser);
 
-router.get("/", verifyAuthToken, profile);
+router.get("/profile", verifyAuthToken, profile);
 
 export default router;
