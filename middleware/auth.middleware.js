@@ -11,11 +11,6 @@ const verifyAuthToken = async (req, res, next) => {
     const token = req.cookies.token;
     console.log(token, "inside verify Auth Token");
 
-    // if (!token) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "invalid credentials...token not found" });
-    // }
     let user = null;
     if (token) {
       user = await verifyToken(token);
@@ -27,13 +22,16 @@ const verifyAuthToken = async (req, res, next) => {
       req.userId = user._id;
       return next();
     }
+
     const refreshToken = req.cookies.refreshToken;
     console.log(refreshToken, "inside verify Auth Token for refresh token");
+
     if (!refreshToken) {
       return res
         .status(400)
         .json({ message: "invalid credentials...refresh token not found" });
     }
+
     const refreshUser = await verifyRefreshToken(refreshToken);
     console.log(refreshUser, "inside verify Auth Token for refresh token");
     if (!refreshUser) {

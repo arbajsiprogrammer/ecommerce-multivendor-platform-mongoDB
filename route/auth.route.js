@@ -15,10 +15,4 @@ router.post("/signup", signup);
 
 router.post("/login", login);
 
-router.post("/logout", verifyAuthToken, logout);
-
-router.delete("/delete", verifyAuthToken, deleteUser);
-
-router.get("/profile", verifyAuthToken, profile);
-
 export default router;
