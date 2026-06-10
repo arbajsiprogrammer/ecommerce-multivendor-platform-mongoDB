@@ -1,16 +1,19 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import {
+  ACCESS_TOKEN_EXPIRY,
+  REFRESH_TOKEN_EXPIRY,
+} from "../Constants/authToken.consts.js";
 
 dotenv.config();
+
 const secretKey = process.env.JWT_SECRET_KEY;
 const refresh_secretKey = process.env.JWT_REFRESH_SECRET_KEY;
-console.log("secretKey", secretKey);
-console.log("refresh_secretKey", refresh_secretKey);
 
 // generating JWT access token
 const generateToken = async (payload) => {
-  return await jwt.sign(payload, secretKey, { expiresIn: "10m" });
+  return await jwt.sign(payload, secretKey, { expiresIn: ACCESS_TOKEN_EXPIRY });
 };
 
 const verifyToken = async (token) => {
@@ -26,7 +29,9 @@ const verifyToken = async (token) => {
 
 // generating JWT refresh token
 const generateRefreshToken = async (payload) => {
-  return await jwt.sign(payload, refresh_secretKey, { expiresIn: "7d" });
+  return await jwt.sign(payload, refresh_secretKey, {
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+  });
 };
 
 const verifyRefreshToken = async (token) => {

@@ -4,6 +4,7 @@ import {
   deleteUser,
   logout,
   profile,
+  refreshToken,
 } from "../controller/userProfile.controller.js";
 
 const router = express.Router();
