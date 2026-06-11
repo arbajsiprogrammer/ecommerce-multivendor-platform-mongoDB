@@ -1,4 +1,3 @@
-import { error } from "winston";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import { mdb } from "../util/db.util.js";
 
@@ -13,12 +12,9 @@ const storeRefreshToken = async function (payload, refreshToken) {
   // hashing refresh token
   const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-  // generating universal unique ID for identifying refresh token from db
-  const sessionId = crypto.randomUUID();
-
   // storing refresh token in DB
   const refreshTokenObject = {
-    sessionId,
+    sessionId: payload.sessionId,
     userId: payload._id,
     token: hashedRefreshToken,
     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
@@ -31,7 +27,7 @@ const storeRefreshToken = async function (payload, refreshToken) {
   if (response) {
     logger.info(`refresh token stored in DB ${JSON.stringify(response)}`);
   } else {
-    throw new error(
+    throw new Error(
       ` failed to store refresh token in DB ${JSON.stringify(response)}`,
     );
   }
@@ -44,7 +40,7 @@ const getRefreshToken = async (user) => {
     .findOne({ sessionId: user.sessionId, userId: new ObjectId(user._id) });
 
   if (!dbRefreshToken) {
-    throw new error("Refresh token not found in DB");
+    throw new Error("Refresh token not found in DB");
   }
 
   //   check expiry
@@ -59,7 +55,7 @@ const getRefreshToken = async (user) => {
       JSON.stringify(deleteResponse),
     );
 
-    throw new error("refresh token expired...");
+    throw new Error("refresh token expired...");
   }
 
   return dbRefreshToken;

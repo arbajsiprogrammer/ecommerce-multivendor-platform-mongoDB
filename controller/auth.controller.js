@@ -14,7 +14,7 @@ import {
   generateToken,
   hashPassword,
   rotateRefreshToken,
-  storeTokens,
+  createTokens,
   verifyPassword,
   verifyRefreshToken,
 } from "../service/auth.service.js";
@@ -32,7 +32,7 @@ const signup = async function (req, res) {
     const existingUser = await findUserByPhone(user.role, user.phoneNumber);
 
     if (existingUser) {
-      errorResponse(res, 400, " User already exist...please log in ");
+      return errorResponse(res, 400, " User already exist...please log in ");
     }
     // hash password
     const hashedPassword = await hashPassword(user.password);
@@ -43,7 +43,7 @@ const signup = async function (req, res) {
 
     successResponse(res, 200, "User created successfully", newUser);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -51,14 +51,18 @@ const login = async function (req, res) {
   try {
     const { phoneNumber, password, role } = req.body;
 
-    const existingUser = findUserByPhone(role, phoneNumber);
+    const existingUser = await findUserByPhone(role, phoneNumber);
     if (!existingUser) {
-      errorResponse(res, 400, "Invalid credentials...user not found");
+      return errorResponse(res, 400, "Invalid credentials...user not found");
     }
 
     const isMatch = await verifyPassword(password, existingUser.password);
     if (!isMatch) {
-      errorResponse(res, 400, "Invalid credentials...password not match");
+      return errorResponse(
+        res,
+        400,
+        "Invalid credentials...password not match",
+      );
     }
 
     // store access token and refresh token into the cookies
@@ -67,13 +71,11 @@ const login = async function (req, res) {
       role,
       _id: existingUser._id,
     };
-    storeTokens(res, payload);
+    await createTokens(payload);
 
     successResponse(res, 200, "Login successful", existingUser);
   } catch (error) {
-    console.log(error);
-    logger.error("Internal server error");
-    return res.status(500).json({ message: "Internal server error" });
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -81,24 +83,26 @@ const refreshToken = async function (req, res) {
   try {
     const incomingRefreshToken = req.cookies[REFRESH_TOKEN];
     if (!incomingRefreshToken) {
-      errorResponse(res, 400, "refresh token not found ");
+      return errorResponse(res, 400, "refresh token not found ");
     }
 
     const user = await verifyRefreshToken(incomingRefreshToken);
 
     // now generating access token
-    const { accessToken, refreshToken } = generateNewTokens(user);
+    const { accessToken, refreshToken } = await generateNewTokens(user);
 
     //Refresh Token Rotation
-    rotateRefreshToken(user, refreshToken);
+    await rotateRefreshToken(user, refreshToken);
 
     res.cookie(ACCESS_TOKEN, accessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
     res.cookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_EXPIRY_OPTIONS);
 
-    return res.status(200).json({ message: "Token refreshed successfully" });
+    successResponse(res, 200, "Token refreshed successfully", {
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
-    logger.error(error);
-    return res.status(500).json({ message: error.message });
+    return errorResponse(res, 500, error.message);
   }
 };
 export { signup, login, refreshToken };

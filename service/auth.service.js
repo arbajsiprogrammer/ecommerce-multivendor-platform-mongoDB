@@ -39,7 +39,6 @@ const verifyToken = async (token) => {
 };
 
 // generating JWT refresh token
-
 const generateRefreshToken = async (payload) => {
   return await jwt.sign(payload, refresh_secretKey, {
     expiresIn: REFRESH_TOKEN_EXPIRY,
@@ -53,21 +52,21 @@ const verifyRefreshToken = async (token) => {
     logger.info(`user inside verify refresh token ${JSON.stringify(user)}`);
 
     if (!user) {
-      throw new error("refresh token verification failed");
+      throw new Error("refresh token verification failed");
     }
 
     // get token from DB
-    const dbRefreshToken = getRefreshToken(user);
+    const dbRefreshToken = await getRefreshToken(user);
 
     const isMatch = await bcrypt.compare(token, dbRefreshToken.token);
 
     if (!isMatch) {
-      throw new error("Refresh token not matched");
+      throw new Error("Refresh token not matched");
     }
 
     return user;
   } catch (error) {
-    throw new error(error.message);
+    throw new Error(error.message);
   }
 };
 // hashing password
@@ -105,30 +104,34 @@ const findUserByPhone = async (role, phoneNumber) => {
   }
 };
 
-const storeTokens = async function (res, payload) {
+const createTokens = async function (payload) {
   try {
     // access token
     const AccessToken = await generateToken(payload);
     if (!AccessToken) {
-      errorResponse(res, 400, "Access Token generation failed");
+      throw new Error("Access Token generation failed");
     }
     logger.info("Token generation successful");
 
+    // generating universal unique ID for identifying refresh token from db
+    const sessionId = crypto.randomUUID();
+    payload = { sessionId, ...payload };
+
     // generating refresh token
-    const refreshToken = await generateRefreshToken(payload);
+    const refreshToken = await generateRefreshToken();
     if (!refreshToken) {
-      errorResponse(res, 400, "Refresh token generation failed");
+      throw new Error("Refresh token generation failed");
     }
     logger.info(`Refresh token generation successful`);
 
     // store refresh token into DB
-    storeRefreshToken(payload, refreshToken);
+    await storeRefreshToken(payload, refreshToken);
 
     // store tokens into the cookies
     res.cookie(ACCESS_TOKEN, AccessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
     res.cookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_EXPIRY_OPTIONS);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    throw new Error(error.message);
   }
 };
 
@@ -138,13 +141,13 @@ const generateNewTokens = async (user) => {
   const accessToken = await generateToken(payload);
 
   if (!accessToken) {
-    throw new error("access token generation failed ");
+    throw new Error("access token generation failed ");
   }
 
   // now generating new REFRESH TOKEN
   const refreshToken = await generateRefreshToken(payload);
   if (!refreshToken) {
-    throw new error("refresh token generation failed ");
+    throw new Error("refresh token generation failed ");
   }
 
   return { accessToken, refreshToken };
@@ -152,9 +155,9 @@ const generateNewTokens = async (user) => {
 
 const rotateRefreshToken = async (user, refreshToken) => {
   // delete previous one and add new
-  deleteRefreshToken(user);
+  await deleteRefreshToken(user);
   // storing refresh token in DB
-  storeRefreshToken(user, refreshToken);
+  await storeRefreshToken(user, refreshToken);
 };
 export {
   generateToken,
@@ -164,7 +167,7 @@ export {
   hashPassword,
   verifyPassword,
   findUserByPhone,
-  storeTokens,
+  createTokens,
   generateNewTokens,
   rotateRefreshToken,
 };

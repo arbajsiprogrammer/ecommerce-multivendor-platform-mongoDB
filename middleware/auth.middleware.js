@@ -60,12 +60,12 @@ const validateSignup = async (req, res, next) => {
       logger.error(
         result.error.details[0].message + " in validateSignup middleware",
       );
-      errorResponse(res, 400, result.error.details[0].message);
+      return errorResponse(res, 400, result.error.details[0].message);
     }
 
     next();
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -79,11 +79,11 @@ const validateRole = async (req, res, next) => {
       return res.status(400).json({
         message: "Invalid role",
       });
-      errorResponse(res, 400, "Invalid role");
+      return errorResponse(res, 400, "Invalid role");
     }
     next();
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error.message);
   }
 };
 
