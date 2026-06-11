@@ -7,13 +7,29 @@ import {
   getCartProducts,
   updateCartItems,
 } from "../controller/cart.controller.js";
+import { validateCustomerRole } from "../middleware/customer.middleware.js";
 
 const router = express.Router();
 
-router.get("/:cartItemId", verifyAuthToken, getCartItem);
-router.get("/", verifyAuthToken, getCartProducts);
-router.post("/items/:productId/:skuId", verifyAuthToken, addToCart);
-router.put("/items/:cartItemId", verifyAuthToken, updateCartItems);
-router.delete("/items/:cartItemId", verifyAuthToken, deleteCartItems);
+router.get("/:cartItemId", verifyAuthToken, validateCustomerRole, getCartItem);
+router.get("/", verifyAuthToken, validateCustomerRole, getCartProducts);
+router.post(
+  "/items/:productId/:skuId",
+  validateCustomerRole,
+  verifyAuthToken,
+  addToCart,
+);
+router.put(
+  "/items/:cartItemId",
+  verifyAuthToken,
+  validateCustomerRole,
+  updateCartItems,
+);
+router.delete(
+  "/items/:cartItemId",
+  verifyAuthToken,
+  validateCustomerRole,
+  deleteCartItems,
+);
 
 export default router;

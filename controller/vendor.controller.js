@@ -4,12 +4,16 @@ import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
-import { getExistingProduct } from "../service/vendor.service.js";
+import {
+  getExistingProduct,
+  updateProductSku,
+} from "../service/vendor.service.js";
 import { getExistingOrders } from "../service/order.service.js";
 
 // products API's
 const addProduct = async function (req, res) {
   try {
+    const product = req.body;
     const user = req.user;
     const userId = user._id;
 
@@ -85,7 +89,7 @@ const updateProduct = async function (req, res) {
     // showing only the vendors product
     const existingProducts = await mdb
       .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) });
+      .findOne({ vendorId: id, _id: new ObjectId(productId) });
 
     if (!existingProducts) {
       errorResponse(res, 400, "product not found");
@@ -200,7 +204,7 @@ const updateSKU = async function (req, res) {
     }
 
     const tempSkus = existingProduct[0].productSkuses;
-    const response = await updateProductSku(tempSkus, skuId);
+    const response = await updateProductSku(tempSkus, skuId, productId);
 
     successResponse(res, 200, "product SKU updated", response);
   } catch (error) {
@@ -256,7 +260,7 @@ const addImage = async function (req, res) {
     const tempSku = existingProduct[0].productSkuses;
 
     const updatedSkus = tempSku.map((sku) => {
-      if ((sku.id = skuId)) {
+      if (sku.id == skuId) {
         sku.images.push({
           id: imgId,
           imageUrl,
@@ -320,7 +324,7 @@ const deleteImage = async function (req, res) {
     const sku = tempSku.filter((sku) => sku.id == skuId);
 
     const updatedSkus = tempSku.map((sku) => {
-      if ((sku.id = skuId)) {
+      if (sku.id == skuId) {
         const updatedImages = sku.images.filter((image) => image.id != imageId);
         sku.images = updatedImages;
       }

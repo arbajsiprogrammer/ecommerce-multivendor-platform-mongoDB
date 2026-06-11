@@ -6,9 +6,6 @@ const validateVendorRole = async (req, res, next) => {
     const user = req.user || req.body;
 
     if (user.role != "vendor") {
-      return res.status(400).json({
-        message: "Invalid role",
-      });
       return errorResponse(res, 400, "Invalid role");
     }
     next();

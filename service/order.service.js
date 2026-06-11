@@ -1,5 +1,5 @@
-import COLLECTION from "../Constants/collectionName.constant.s";
-import { errorResponse } from "../helper/response.helper";
+import COLLECTION from "../Constants/collectionName.constant.js";
+import { errorResponse } from "../helper/response.helper.js";
 
 const getExistingOrders = async (orderId) => {
   const existingOrder = await mdb

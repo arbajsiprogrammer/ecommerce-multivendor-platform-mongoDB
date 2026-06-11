@@ -5,13 +5,13 @@ import COLLECTION from "../Constants/collectionName.constant.js";
 const getExistingProduct = async (vendorId, productId) => {
   const existingProduct = await mdb
     .collection(COLLECTION.PRODUCT)
-    .find({ vendorId: id, _id: new ObjectId(productId) })
+    .find({ vendorId: vendorId, _id: new ObjectId(productId) })
     .toArray();
 
   return existingProduct;
 };
 
-const updateProductSku = async (tempSkus, skuId) => {
+const updateProductSku = async (tempSkus, skuId, productId) => {
   const updatedSkus = tempSkus.map((sku) => {
     if (sku.id == skuId) {
       return productSku;
