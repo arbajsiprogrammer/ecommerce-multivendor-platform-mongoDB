@@ -2,94 +2,52 @@ import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
+import { errorResponse, successResponse } from "../helper/response.helper.js";
+import {
+  findCategoryByName,
+  isCategoryExist,
+} from "../service/admin.service.js";
 
 // categories
 const getAllCategories = async function (req, res) {
   try {
-    const role = req.user.role;
-
-    console.log(role, "inside get all categories...");
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.error("user must be admin to access categories");
-      return res.status(400).json({ message: "user must be admin" });
-    }
-
     const categories = await mdb
       .collection(COLLECTION.CATEGORY)
       .find({})
       .toArray();
 
-    console.log(categories, "inside categories..");
-    logger.info("categories fetched successfully");
-
-    return res.status(200).json(categories);
+    successResponse(res, 200, "categories fetched successfully", categories);
   } catch (error) {
-    logger.error("error fetching categories: " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const getCategory = async function (req, res) {
   try {
-    const role = req.user.role;
-    const categoryId = req.params.id;
-
-    console.log(role, "inside get category...");
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.error("user must be admin to access category");
-      return res.status(400).json({ message: "user must be admin" });
-    }
+    const categoryId = req.params.categoryId;
 
     const category = await mdb
       .collection(COLLECTION.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     if (!category) {
-      return res.status(400).json({ message: " category not found " });
+      return errorResponse(res, 400, "categories not found ");
     }
 
-    logger.info("category fetched successfully");
-    console.log(category, "inside get category..");
-
-    return res.status(200).json(category);
+    successResponse(res, 200, "category fetched successfully", category);
   } catch (error) {
-    logger.error("error fetching category: " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const updateCategory = async function (req, res) {
   try {
-    const role = req.user.role;
     const category = req.body.category;
-    const categoryId = req.params.id;
+    const categoryId = req.params.categoryId;
+    // check if Category exist or not
+    const existingCategory = await isCategoryExist(categoryId);
 
-    console.log(role, "inside get category...");
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.error("user must be admin to update category");
-      return res.status(400).json({ message: "user must be admin" });
-    }
-
-    const existingCategory = await mdb
-      .collection(COLLECTION.CATEGORY)
-      .findOne({ _id: new ObjectId(categoryId) });
-
-    console.log(existingCategory, "inside get category..");
-
-    if (!existingCategory) {
-      logger.error("category not found with id: " + categoryId);
-      return res.status(400).json({ message: "category not found " });
-    }
-
-    const row = await mdb.collection(COLLECTION.CATEGORY).updateOne(
+    const response = await mdb.collection(COLLECTION.CATEGORY).updateOne(
       { _id: existingCategory._id },
       {
         $set: {
@@ -99,189 +57,94 @@ const updateCategory = async function (req, res) {
         },
       },
     );
-    logger.info(row, "category updated successfully with id: " + categoryId);
-    return res.status(200).json(row);
+
+    successResponse(
+      res,
+      200,
+      `category updated successfully with id: ${categoryId}`,
+      response,
+    );
   } catch (error) {
-    logger.error("error updating category: " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const addCategory = async function (req, res) {
   try {
-    const role = req.user.role;
-    const category = req.body.category;
+    const category = req.body;
 
-    console.log(role, "inside add category");
+    const existingCategory = await findCategoryByName(category.categoryName);
 
-    console.log(category, "inside add category ");
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.error("user must be admin to add category");
-      return res.status(400).json({ message: "user must be admin" });
-    }
-
-    // const [existingCategory] = await db.execute(
-    //   `select * from categories where category_name = ?`,
-    //   [category.category_name],
-    // );
-    const existingCategory = await mdb
+    const response = await mdb
       .collection(COLLECTION.CATEGORY)
-      .findOne({ categoryName: category.categoryName });
-    console.log(existingCategory, "existing  category");
+      .insertOne(category);
 
-    if (existingCategory) {
-      logger.error(
-        "category already exists with name: " + category.categoryName,
-      );
-      return res.status(400).json({ message: "category already exists" });
-    }
-
-    const row = await mdb.collection(COLLECTION.CATEGORY).insertOne(category);
-
-    logger.info("category added successfully");
-    console.log(row, " row ");
-
-    return res
-      .status(200)
-      .json({ message: "category added successfully ", response: row });
+    successResponse(res, 200, "category added successfully", response);
   } catch (error) {
-    logger.error("error adding category: " + error.message);
-    return res.status(500).json({ message: " inside add category " + error });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const deleteCategory = async function (req, res) {
   try {
-    const role = req.user.role;
-    const categoryId = req.params.id;
+    const categoryId = req.params.categoryId;
 
-    console.log(role, "inside get category...");
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.error("user must be admin to delete category");
-      return res.status(400).json({ message: "user must be admin" });
-    }
-
-    const existingCategory = await mdb
-      .collection(COLLECTION.CATEGORY)
-      .findOne({ _id: new ObjectId(categoryId) });
-
-    if (!existingCategory) {
-      logger.error(" category not found with id: " + categoryId);
-      return res.status(400).json({ message: " category not found " });
-    }
-
-    console.log(existingCategory, "inside get category..");
+    const existingCategory = await isCategoryExist(categoryId);
 
     const response = await mdb
       .collection(COLLECTION.CATEGORY)
       .deleteOne({ _id: existingCategory._id });
 
-    logger.info("category deleted successfully with id: " + categoryId);
-
-    return res.status(200).json({ message: "category deleted ", response });
+    successResponse(res, 200, "category deleted ", response);
   } catch (error) {
-    logger.error("error deleting category: " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 //vendors
 const getAllVendors = async function (req, res) {
   try {
-    const role = req.user.role;
-    const userId = req.userId;
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.warn(`user with id ${userId} tried to access getAllVendors`);
-      return res.status(400).json({ message: "you are not allowed" });
-    }
-
     const vendors = await mdb.collection(COLLECTION.VENDOR).find({}).toArray();
 
-    logger.info(" vendor data fetched ");
-    return res.status(200).json(vendors);
+    successResponse(res, 200, "vendor data fetched", vendors);
   } catch (error) {
-    logger.error("error getting all vendors : " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 // customers
 const getAllCustomers = async function (req, res) {
   try {
-    const role = req.user.role;
-    const userId = req.userId;
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.warn(`user with id ${userId} tried to access getAllCustomers`);
-      return res.status(400).json({ message: "you are not allowed" });
-    }
-
     const customers = await mdb
       .collection(COLLECTION.CUSTOMER)
       .find({})
       .toArray();
 
-    logger.info("customers data fetched");
-    return res.status(200).json(customers);
+    successResponse(res, 200, "customers data fetched", customers);
   } catch (error) {
-    logger.error("error getting all vendors : " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 // orders
 const getAllOrders = async function (req, res) {
   try {
-    const role = req.user.role;
-    const userId = req.userId;
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.warn(`user with id ${userId} tried to access getAllOrders`);
-      return res.status(400).json({ message: "you are not allowed" });
-    }
-
     const orders = await mdb.collection(COLLECTION.ORDER).find({}).toArray();
 
-    logger.info("orders data fetched");
-    return res.status(200).json(orders);
+    successResponse(res, 200, "orders data fetched", orders);
   } catch (error) {
-    logger.error("error getting all vendors : " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 // payments
 const getAllPayments = async function (req, res) {
   try {
-    const role = req.user.role;
-    const userId = req.userId;
-
-    const authRole = "admin";
-
-    if (role != authRole) {
-      logger.warn(`user with id ${userId} tried to access getAllPayments`);
-      return res.status(400).json({ message: "you are not allowed" });
-    }
-
     const payments = await mdb
       .collection(COLLECTION.PAYMENT)
       .find({})
       .toArray();
 
-    logger.info("payments data fetched");
-    return res.status(200).json(payments);
+    successResponse(res, 200, "payments data fetched", payments);
   } catch (error) {
-    logger.error("error getting all vendors : " + error.message);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 

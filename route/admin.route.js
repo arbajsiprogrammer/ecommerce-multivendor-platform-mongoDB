@@ -12,22 +12,33 @@ import {
   getCategory,
   updateCategory,
 } from "../controller/admin.controller.js";
+import { checkRole } from "../middleware/admin.middleware.js";
 
 const router = express.Router();
 
-router.get("/categories", verifyAuthToken, getAllCategories);
-router.get("/categories/:id", verifyAuthToken, getCategory);
-router.put("/categories/:id", verifyAuthToken, updateCategory);
-router.post("/categories", verifyAuthToken, addCategory);
-router.delete("/categories/:id", verifyAuthToken, deleteCategory);
+router.get("/categories", verifyAuthToken, checkRole, getAllCategories);
+router.get("/categories/:categoryId", verifyAuthToken, checkRole, getCategory);
+router.put(
+  "/categories/:categoryId",
+  verifyAuthToken,
+  checkRole,
+  updateCategory,
+);
+router.post("/categories", verifyAuthToken, checkRole, addCategory);
+router.delete(
+  "/categories/:categoryId",
+  verifyAuthToken,
+  checkRole,
+  deleteCategory,
+);
 
 // GET /admin/vendors
-router.get("/vendors", verifyAuthToken, getAllVendors);
+router.get("/vendors", verifyAuthToken, checkRole, getAllVendors);
 // GET /admin/customers
-router.get("/customers", verifyAuthToken, getAllCustomers);
+router.get("/customers", verifyAuthToken, checkRole, getAllCustomers);
 // GET /admin/orders
-router.get("/orders", verifyAuthToken, getAllOrders);
+router.get("/orders", verifyAuthToken, checkRole, getAllOrders);
 // GET /admin/payments
-router.get("/payments", verifyAuthToken, getAllPayments);
+router.get("/payments", verifyAuthToken, checkRole, getAllPayments);
 
 export default router;
