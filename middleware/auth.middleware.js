@@ -71,7 +71,9 @@ const validateSignup = async (req, res, next) => {
 
 const validateRole = async (req, res, next) => {
   try {
-    const user = req.body;
+    const user = req.user || req.body;
+    console.log("*********", req.user);
+
     // check if role is valid or not
     const validRole = ROLES.includes(user.role);
 

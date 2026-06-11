@@ -21,7 +21,6 @@ import {
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import { ObjectId } from "mongodb";
-import bcrypt from "bcryptjs";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 
 const signup = async function (req, res) {
@@ -71,7 +70,11 @@ const login = async function (req, res) {
       role,
       _id: existingUser._id,
     };
-    await createTokens(payload);
+    const { AccessToken, refreshToken } = await createTokens(payload);
+
+    // store tokens into the cookies
+    res.cookie(ACCESS_TOKEN, AccessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
+    res.cookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_EXPIRY_OPTIONS);
 
     successResponse(res, 200, "Login successful", existingUser);
   } catch (error) {

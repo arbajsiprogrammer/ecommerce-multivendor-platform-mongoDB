@@ -29,9 +29,7 @@ const generateToken = async (payload) => {
 
 const verifyToken = async (token) => {
   try {
-    console.log("secretKey", secretKey);
     const user = await jwt.verify(token, secretKey);
-    console.log(user, "*********user inside verify token ");
     return user;
   } catch (error) {
     console.log(error);
@@ -97,7 +95,9 @@ const findUserByPhone = async (role, phoneNumber) => {
       .collection(`${role}s`)
       .findOne({ phoneNumber });
 
-    logger.warn(`existing user in signup ${JSON.stringify(existingUser)}`);
+    logger.warn(
+      `existing user in findUserByPhone ${JSON.stringify(existingUser)}`,
+    );
     return existingUser;
   } catch (error) {
     logger.error(`internal server error.... ${error}`);
@@ -118,7 +118,7 @@ const createTokens = async function (payload) {
     payload = { sessionId, ...payload };
 
     // generating refresh token
-    const refreshToken = await generateRefreshToken();
+    const refreshToken = await generateRefreshToken(payload);
     if (!refreshToken) {
       throw new Error("Refresh token generation failed");
     }
@@ -127,9 +127,7 @@ const createTokens = async function (payload) {
     // store refresh token into DB
     await storeRefreshToken(payload, refreshToken);
 
-    // store tokens into the cookies
-    res.cookie(ACCESS_TOKEN, AccessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
-    res.cookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_EXPIRY_OPTIONS);
+    return { AccessToken, refreshToken };
   } catch (error) {
     throw new Error(error.message);
   }

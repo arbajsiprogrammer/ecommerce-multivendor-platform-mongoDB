@@ -1,5 +1,8 @@
 import express from "express";
-import { verifyAuthToken } from "../middleware/auth.middleware.js";
+import {
+  validateRole,
+  verifyAuthToken,
+} from "../middleware/auth.middleware.js";
 import {
   deleteUser,
   logout,
@@ -9,12 +12,17 @@ import {
 
 const router = express.Router();
 
-router.post("/logout", verifyAuthToken, logout);
+router.post("/logout", verifyAuthToken, validateRole, logout);
 
-router.delete("/delete", verifyAuthToken, deleteUser);
+router.delete("/delete", verifyAuthToken, validateRole, deleteUser);
 
-router.get("/profile", verifyAuthToken, profile);
+router.get("/profile", verifyAuthToken, validateRole, profile);
 
-router.get("/logout-from-all-devices", verifyAuthToken, logoutFromAllDevices);
+router.get(
+  "/logout-from-all-devices",
+  validateRole,
+  verifyAuthToken,
+  logoutFromAllDevices,
+);
 
 export default router;
