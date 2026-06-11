@@ -2,460 +2,227 @@ import { ObjectId, ReturnDocument } from "mongodb";
 import { productSchema } from "../model/productSchema.model.js";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
+import { errorResponse, successResponse } from "../helper/response.helper.js";
+import COLLECTION from "../Constants/collectionName.constant.js";
+import { getExistingProduct } from "../service/vendor.service.js";
+import { getExistingOrders } from "../service/order.service.js";
 
 // products API's
 const addProduct = async function (req, res) {
   try {
     const user = req.user;
-    const userId = req.userId;
+    const userId = user._id;
 
-    const product = req.body;
-    console.log("product");
-    console.log(product);
-
-    if (!product) {
-      logger.error("Product details missing in request body");
-      return res.status(400).json({ message: "product details missing" });
-    }
-
-    const result = productSchema.validate({
-      product_name: product.productName,
-      price: product.productSkuses[0].price,
-    });
-
-    if (result.error) {
-      logger.error(
-        `Product validation failed: ${result.error.details[0].message}`,
-      );
-      return res.status(400).json({ message: result.error.details[0].message });
-    }
-
-    const row = await mdb
+    const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .insertOne({ vendorId: userId, ...product });
 
-    logger.info(` Product added successfully : ${row}`);
-    return res
-      .status(200)
-      .json({ message: "product added successfully ", row });
+    successResponse(res, 200, "product added successfully", response);
   } catch (error) {
-    logger.error(`Error adding product: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 const getAllProducts = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
     const vendorId = req.user._id;
-    console.log(" vendorId ", vendorId);
-    let products;
 
-    if (role == "vendor") {
-      products = await mdb
-        .collection(COLLECTION.PRODUCT)
-        .find({ vendorId })
-        .toArray();
-    }
+    const products = await mdb
+      .collection(COLLECTION.PRODUCT)
+      .find({ vendorId })
+      .toArray();
 
-    console.log(products, " all products ");
-    logger.info(
-      `Products retrieved successfully for user ID: ${vendorId} with role: ${role}`,
-    );
-    return res.status(200).json(products);
+    successResponse(res, 200, "products fetch successfully", products);
   } catch (error) {
-    logger.error(`Error retrieving products: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const getProduct = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
     const id = req.user._id;
-    const productId = req.params.id;
-    console.log(id, " ***id*** ");
-    console.log(productId, " productId ");
-    let products;
+    const productId = req.params.productId;
 
-    if (role == "vendor") {
-      products = await mdb
-        .collection(COLLECTION.PRODUCT)
-        .find({ vendorId: id, _id: new ObjectId(productId) })
-        .toArray();
-    }
-    console.log(products, " product ");
-    logger.info(
-      `Product retrieved successfully for user ID: ${id} with role: ${role} and product ID: ${productId}`,
-    );
-    return res.status(200).json(products);
+    const products = await mdb
+      .collection(COLLECTION.PRODUCT)
+      .find({ vendorId: id, _id: new ObjectId(productId) })
+      .toArray();
+
+    successResponse(res, 200, "product fetch successfully", products);
   } catch (error) {
-    logger.error(`Error retrieving product: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const deleteProduct = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
     const id = req.user._id;
-    const productId = req.params.id;
+    const productId = req.params.productId;
 
-    let products;
-
-    if (role == "vendor") {
-      products = await mdb
-        .collection(COLLECTION.PRODUCT)
-        .findOne({ vendorId: id, _id: new ObjectId(productId) });
-    }
-
-    logger.info(
-      `Product retrieved successfully for user ID: ${id} with role: ${role} and product ID: ${productId}`,
-    );
-    console.log(products, " product ");
+    const products = await mdb
+      .collection(COLLECTION.PRODUCT)
+      .findOne({ vendorId: id, _id: new ObjectId(productId) });
 
     if (!products) {
-      logger.error(
-        `Product not found for user ID: ${id} with role: ${role} and product ID: ${productId}`,
-      );
-      return res.status(400).json({ message: "product not found" });
+      errorResponse(res, 400, "product not found");
     }
 
     const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .deleteOne({ _id: new ObjectId(productId) });
 
-    logger.info(
-      `Product deleted successfully for user ID: ${id} with role: ${role} and product ID: ${productId}`,
-    );
-    return res.status(200).json({ message: "product deleted ", response });
+    successResponse(res, 200, "product deleted successfully", response);
   } catch (error) {
-    logger.error(`Error deleting product: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const updateProduct = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
     const id = req.user._id;
-    const productId = req.params.id;
+    const productId = req.params.productId;
     const product = req.body;
 
-    let existingProducts;
-
-    if (role == "vendor") {
-      // showing only the vendors product
-      existingProducts = await mdb
-        .collection(COLLECTION.PRODUCT)
-        .find({ vendorId: id, _id: new ObjectId(productId) });
-    }
-
-    console.log(existingProducts, " existingProducts in update product ");
+    // showing only the vendors product
+    const existingProducts = await mdb
+      .collection(COLLECTION.PRODUCT)
+      .find({ vendorId: id, _id: new ObjectId(productId) });
 
     if (!existingProducts) {
-      logger.error(
-        `Product not found for update: User ID: ${id}, Role: ${role}, Product ID: ${productId}`,
-      );
-      return res.status(400).json({ message: " product not found " });
+      errorResponse(res, 400, "product not found");
     }
 
     const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .updateOne({ _id: new ObjectId(productId) }, { $set: { ...product } });
 
-    logger.info(
-      `Product updated successfully for user ID: ${id} with role: ${role} and product ID: ${productId}`,
-    );
-    return res.status(200).json({ message: "product updated ", response });
+    successResponse(res, 200, "product updated successfully", response);
   } catch (error) {
-    logger.error(`Error updating product: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 //  product sku's
 const getAllSKU = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
     const id = req.params.id;
-    console.log("role ", role, " phoneNumber ", phoneNumber, " id ", id);
+
     let products;
     let productSkus;
 
-    if (role == "vendor") {
-      products = await mdb
-        .collection(COLLECTION.PRODUCT)
-        .find({ _id: new ObjectId(id) })
-        .toArray();
+    products = await mdb
+      .collection(COLLECTION.PRODUCT)
+      .find({ _id: new ObjectId(id) })
+      .toArray();
 
-      productSkus = products.map((product) => product.productSkuses);
-    }
+    productSkus = products.map((product) => product.productSkuses);
 
-    console.log(products, " products ");
-    console.log(productSkus, " product sku ");
-
-    logger.info(
-      `Product SKUs retrieved successfully for user ID: ${id} with role: ${role}`,
+    successResponse(
+      res,
+      200,
+      "product  SKUs retrieved  successfully",
+      productSkus,
     );
-
-    return res.status(200).json(productSkus);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
-const getSKU = async function (req, res) {
-  try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
-    const id = req.params.id;
-    const productId = req.params.id;
+// const   = async function (req, res) {
+//   try {
+//     const id = req.params.id;
+//     const productId = req.params.id;
 
-    let product;
+//     let product;
 
-    if (role == "vendor") {
-      // showing only the vendors product
-      [product] = await db.execute(
-        `select * from product_skus where id = ?  `,
-        [id],
-      );
-    }
+//       // showing only the vendors product
+//       [product] = await db.execute(
+//         `select * from product_skus where id = ?  `,
+//         [id],
+//       );
+//     }
 
-    console.log(product, " SKU  ");
+//     console.log(product, " SKU  ");
 
-    if (!product) {
-      logger.error(
-        `Product SKU not found: User ID: ${id}, Role: ${role}, SKU ID: ${productId}`,
-      );
-      return res.status(400).json({ message: " product not found " });
-    }
+//     if (!product) {
+//       errorResponse(res, 400, "product not found");
+//     }
 
-    logger.info(
-      `Product SKU retrieved successfully for user ID: ${id} with role: ${role} and SKU ID: ${productId}`,
-    );
-
-    return res.status(200).json(product);
-  } catch (error) {
-    logger.error(`Error retrieving product SKU: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
-  }
-};
+//     successResponse(res, 200, "product  SKUs retrieved  successfully", product);
+//   } catch (error) {
+//     errorResponse(res, 500, error.message);
+//   }
+// };
 
 const addSKU = async function (req, res) {
   try {
     const product = req.body;
-    console.log(product, " sku data in addSKU ");
     const user = req.user;
-    const id = req.userId;
+    const vendorId = user._id;
     const productId = req.params.id;
 
     if (!product) {
-      logger.error("Product SKU details missing in request body");
-      return res.status(400).json({ message: "product details missing" });
+      errorResponse(res, 400, "product details missing");
     }
 
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
+    const existingProduct = await getExistingProduct(vendorId, productId);
 
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found  with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
+
     existingProduct[0].productSkuses.push(product);
-    console.log("existing product");
-    console.log(existingProduct);
     const { _id, ...newProduct } = existingProduct[0];
-    console.log(" new product ");
-    console.log(newProduct, " new product ");
 
     const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .updateOne({ _id: new ObjectId(productId) }, { $set: { ...newProduct } });
 
-    logger.info(
-      `Product SKU added successfully for user ID: ${id} with role: ${user.role}`,
-    );
-    return res
-      .status(200)
-      .json({ message: " product added successfully ", response });
+    successResponse(res, 200, "product added successfully", response);
   } catch (error) {
-    logger.error(`Error adding product SKU: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const updateSKU = async function (req, res) {
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
-    const id = req.user._id;
+    const vendorId = req.user._id;
     const skuId = req.query.skuId;
     const productId = req.query.productId;
     const productSku = req.body;
 
-    console.log("productSku");
-    console.log(productSku);
-
-    console.log("skuId ", skuId);
-    console.log("productId ", productId);
-    let existingProducts;
-
-    if (role != "vendor") {
-      return res.status(400).json({ message: "your role is not authorized " });
-    }
-
     if (!productSku) {
-      logger.error("Product SKU details missing in request body");
-      return res.status(400).json({ message: "product SKU details missing" });
+      errorResponse(res, 400, "Product SKU details missing in request body");
     }
 
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
-
+    const existingProduct = await getExistingProduct(vendorId, productId);
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
 
-    console.log(" existingProduct in update product ");
-    console.log(existingProduct);
-
-    if (!existingProduct) {
-      logger.error(
-        `Product SKU not found for update: User ID: ${id}, Role: ${role}, SKU ID: ${skuId}`,
-      );
-      return res.status(400).json({ message: " product not found " });
-    }
     const tempSkus = existingProduct[0].productSkuses;
+    const response = await updateProductSku(tempSkus, skuId);
 
-    const updateProductSkus = tempSkus.map((sku) => {
-      if (sku.id == skuId) {
-        return productSku;
-      } else {
-        return sku;
-      }
-    });
-
-    console.log("updateProductSkus");
-    console.log(updateProductSkus);
-
-    const response = mdb
-      .collection(COLLECTION.PRODUCT)
-      .updateOne(
-        { _id: new ObjectId(productId) },
-        { $set: { productSkuses: updateProductSkus } },
-      );
-
-    logger.info(
-      `product SKU updated successfully for user ID: ${id} with role: ${role} and SKU ID: ${skuId}`,
-    );
-
-    return res.status(200).json({ message: "product updated ", response });
+    successResponse(res, 200, "product SKU updated", response);
   } catch (error) {
-    logger.error(`Error updating product SKU: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const deleteSKU = async function (req, res) {
-  // try {
-  //   const role = req.user.role;
-  //   const phoneNumber = req.user.phoneNumber;
-  //   const id = req.user._id;
-  //   const skuId = req.params.id;
-
-  //   let product;
-
-  //   if (role == "vendor") {
-  //     // showing only the vendors product
-  //     [product] = await db.execute(`select * from product_skus where id = ?`, [
-  //       skuId,
-  //     ]);
-  //   }
-
-  //   console.log(product, " sku in delete sku ");
-
-  //   if (!product) {
-  //     logger.error(
-  //       `Product SKU not found for deletion: User ID: ${id}, Role: ${role}, SKU ID: ${skuId}`,
-  //     );
-  //     return res.status(400).json({ message: "sku not found" });
-  //   }
-
-  //   const [row] = await db.execute(`delete from product_skus where id = ?`, [
-  //     skuId,
-  //   ]);
-  //   logger.info(
-  //     `Product SKU deleted successfully for user ID: ${id} with role: ${role} and SKU ID: ${skuId}`,
-  //   );
-  //   return res.status(200).json({ message: "product deleted ", row });
-  // } catch (error) {
-  //   logger.error(`Error deleting product SKU: ${error.message}`);
-  //   console.log(error);
-  //   return res.status(500).json({ message: error.message });
-  // }
-
   try {
-    const role = req.user.role;
-    const phoneNumber = req.user.phoneNumber;
-    const id = req.user._id;
+    const vendorId = req.user._id;
     const skuId = req.query.skuId;
     const productId = req.query.productId;
 
-    console.log("skuId ", skuId);
-    console.log("productId ", productId);
-    let existingProducts;
-
-    if (role != "vendor") {
-      return res.status(400).json({ message: "your role is not authorized " });
-    }
-
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
+    const existingProduct = await getExistingProduct(vendorId, productId);
 
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
 
-    console.log(" existingProduct in delete sku ");
-    console.log(existingProduct);
-
-    if (!existingProduct) {
-      logger.error(
-        `Product SKU not found for update: User ID: ${id}, Role: ${role}, SKU ID: ${skuId}`,
-      );
-      return res.status(400).json({ message: " product not found " });
-    }
     const tempSkus = existingProduct[0].productSkuses;
 
     const updateProductSkus = tempSkus.filter((sku) => sku.id != skuId);
-
-    console.log("updateProductSkus");
-    console.log(updateProductSkus);
 
     const response = mdb
       .collection(COLLECTION.PRODUCT)
@@ -464,15 +231,9 @@ const deleteSKU = async function (req, res) {
         { $set: { productSkuses: updateProductSkus } },
       );
 
-    logger.info(
-      `product SKU updated successfully for user ID: ${id} with role: ${role} and SKU ID: ${skuId}`,
-    );
-
-    return res.status(200).json({ message: "product sku deleted ", response });
+    successResponse(res, 200, "product SKU deleted", response);
   } catch (error) {
-    logger.error(`Error updating product SKU: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -480,38 +241,17 @@ const deleteSKU = async function (req, res) {
 const addImage = async function (req, res) {
   try {
     const imageUrl = req.body.imageUrl;
-    const imgId = req.body.id || Date.now().toString();
+    const imgId = req.body.id || crypto.randomUUID();
 
     const productId = req.params.productId;
     const skuId = req.params.skuId;
+    const vendorId = req.user._id;
 
-    const role = req.user.role;
-    const id = req.user._id;
-
-    if (!productId || !skuId) {
-      logger.error("Product SKU ID or productId missing in request parameters");
-      return res.status(400).json({ message: "product skus id missing" });
-    }
-
-    let existingProducts;
-
-    if (role != "vendor") {
-      return res.status(400).json({ message: "your role is not authorized " });
-    }
-
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
+    const existingProduct = await getExistingProduct(vendorId, productId);
 
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
-
-    console.log(" existingProduct in delete sku ");
-    console.log(existingProduct);
 
     const tempSku = existingProduct[0].productSkuses;
 
@@ -525,10 +265,6 @@ const addImage = async function (req, res) {
       return sku;
     });
 
-    console.log("updatedSkus ");
-    console.log(updatedSkus);
-    logger.info(`sku images updated successfully for Product SKU ID: ${skuId}`);
-
     const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .updateOne(
@@ -536,11 +272,9 @@ const addImage = async function (req, res) {
         { $set: { productSkuses: updatedSkus } },
       );
 
-    return res.status(200).json(response);
+    successResponse(res, 200, "product SKU image added ", response);
   } catch (error) {
-    logger.error(`Error retrieving images: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -548,33 +282,13 @@ const getImages = async function (req, res) {
   try {
     const productId = req.params.productId;
     const skuId = req.params.skuId;
-    const role = req.user.role;
-    const id = req.user._id;
+    const vendorId = req.user._id;
 
-    if (!productId || !skuId) {
-      logger.error("Product SKU ID or productId missing in request parameters");
-      return res.status(400).json({ message: "product skus id missing" });
-    }
-
-    let existingProducts;
-
-    if (role != "vendor") {
-      return res.status(400).json({ message: "your role is not authorized " });
-    }
-
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
+    const existingProduct = await getExistingProduct(vendorId, productId);
 
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
-
-    console.log(" existingProduct in delete sku ");
-    console.log(existingProduct);
 
     const tempSku = existingProduct[0].productSkuses;
     const sku = tempSku.filter((sku) => sku.id == skuId);
@@ -583,11 +297,9 @@ const getImages = async function (req, res) {
     console.log(images);
     logger.info(`Images retrieved successfully for Product SKU ID: ${skuId}`);
 
-    return res.status(200).json(images);
+    successResponse(res, 200, "Images retrieved successfully", images);
   } catch (error) {
-    logger.error(`Error retrieving images: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -596,34 +308,13 @@ const deleteImage = async function (req, res) {
     const productId = req.params.productId;
     const skuId = req.params.skuId;
     const imageId = req.params.imageId;
+    const vendorId = req.user._id;
 
-    const role = req.user.role;
-    const id = req.user._id;
-
-    if (!productId || !skuId) {
-      logger.error("Product SKU ID or productId missing in request parameters");
-      return res.status(400).json({ message: "product skus id missing" });
-    }
-
-    let existingProducts;
-
-    if (role != "vendor") {
-      return res.status(400).json({ message: "your role is not authorized " });
-    }
-
-    const existingProduct = await mdb
-      .collection(COLLECTION.PRODUCT)
-      .find({ vendorId: id, _id: new ObjectId(productId) })
-      .toArray();
+    const existingProduct = await getExistingProduct(vendorId, productId);
 
     if (existingProduct.length == 0) {
-      return res
-        .status(400)
-        .json({ message: "product not found with id ", productId });
+      errorResponse(res, 400, "product not found");
     }
-
-    console.log(" existingProduct in delete sku ");
-    console.log(existingProduct);
 
     const tempSku = existingProduct[0].productSkuses;
     const sku = tempSku.filter((sku) => sku.id == skuId);
@@ -636,10 +327,6 @@ const deleteImage = async function (req, res) {
       return sku;
     });
 
-    console.log("updatedSkus ");
-    console.log(updatedSkus);
-    logger.info(`sku images updated successfully for Product SKU ID: ${skuId}`);
-
     const response = await mdb
       .collection(COLLECTION.PRODUCT)
       .updateOne(
@@ -647,11 +334,9 @@ const deleteImage = async function (req, res) {
         { $set: { productSkuses: updatedSkus } },
       );
 
-    return res.status(200).json(response);
+    successResponse(res, 200, "sku images updated successfully", response);
   } catch (error) {
-    logger.error(`Error retrieving images: ${error.message}`);
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -664,23 +349,7 @@ const updateOrderStatus = async (req, res) => {
     const remarks = req.body.remarks;
     const status = req.body.status;
 
-    const role = req.user.role;
-
-    if (role != "vendor" && role != "admin") {
-      return res
-        .status(400)
-        .json({ message: "You are not authorized to update order status" });
-    }
-
-    const existingOrder = await mdb
-      .collection(COLLECTION.ORDER)
-      .findOne({ _id: new ObjectId(orderId) });
-
-    if (!existingOrder) {
-      logger.error(`Order not found for update: Order ID: ${orderId}`);
-      return res.status(400).json({ message: "order not found" });
-    }
-
+    const existingOrder = await getExistingOrders(orderId);
     const newOrderTracks = existingOrder.orderTracks;
 
     const newRecord = {
@@ -699,16 +368,9 @@ const updateOrderStatus = async (req, res) => {
       },
     );
 
-    logger.info(
-      `Order status updated successfully for Order ID: ${orderId} by user ID: ${req.user.id} with role: ${role}`,
-    );
-    return res
-      .status(200)
-      .json({ message: "Order status updated successfully", response });
+    successResponse(res, 200, "Order status updated successfully", response);
   } catch (error) {
-    logger.error(`Error updating order status: ${error.message}`);
-    console.error("Error in updateOrderStatus:", error);
-    res.status(500).json({ message: "Internal server error" });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -721,7 +383,6 @@ export {
   updateProduct,
   // product SKU
   getAllSKU,
-  getSKU,
   addSKU,
   updateSKU,
   deleteSKU,
