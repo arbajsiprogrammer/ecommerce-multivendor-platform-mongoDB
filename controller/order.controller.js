@@ -17,7 +17,7 @@ const addItemToOrder = async (req, res) => {
     //  Validate cart items
 
     const existingCart = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .findOne({ _id: new ObjectId(cartId), customerId });
 
     if (!existingCart) {
@@ -54,7 +54,7 @@ const addItemToOrder = async (req, res) => {
       const productId = item.productId;
 
       const product = await mdb
-        .collection(COLLECTION_NAMES.PRODUCT)
+        .collection(COLLECTION.PRODUCT)
         .findOne({ _id: new ObjectId(productId) });
       const vendorId = product.vendorId;
 
@@ -110,15 +110,13 @@ const addItemToOrder = async (req, res) => {
       orderTracks: orderTracksArray,
     };
 
-    const response = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
-      .insertOne(order);
+    const response = await mdb.collection(COLLECTION.ORDER).insertOne(order);
     console.log("response");
     console.log(response);
 
     // deleting the cart
     const deleteCartResponse = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .deleteOne({ _id: new ObjectId(cartId), customerId });
     console.log("deleteCartResponse");
     console.log(deleteCartResponse);
@@ -141,10 +139,7 @@ const getAllOrders = async (req, res) => {
     const customerId = req.user._id;
     const role = req.user.role;
 
-    const orders = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
-      .find({})
-      .toArray();
+    const orders = await mdb.collection(COLLECTION.ORDER).find({}).toArray();
 
     console.log(orders, " all orders for customer id inside getAllOrders");
 
@@ -171,7 +166,7 @@ const getOrder = async (req, res) => {
     const orderId = req.params.id;
 
     const order = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
+      .collection(COLLECTION.ORDER)
       .findOne({ _id: new ObjectId(orderId) });
     console.log(order, " order details for order id inside getOrder");
 

@@ -12,7 +12,7 @@ const addPayment = async function (req, res) {
     const customerId = req.userId;
 
     const existingPayment = await mdb
-      .collection(COLLECTION_NAMES.PAYMENT)
+      .collection(COLLECTION.PAYMENT)
       .findOne({ orderId });
 
     if (existingPayment) {
@@ -22,7 +22,7 @@ const addPayment = async function (req, res) {
 
     //   validating user input (orderId and total amount)
     const order = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
+      .collection(COLLECTION.ORDER)
       .findOne({ _id: new ObjectId(orderId) });
 
     if (!order) {
@@ -77,8 +77,9 @@ const addPayment = async function (req, res) {
       paymentSplits: paymentSplitsArray,
       paymentTracks: paymentTrackArray,
     };
+
     const response = await mdb
-      .collection(COLLECTION_NAMES.PAYMENT)
+      .collection(COLLECTION.PAYMENT)
       .insertOne(payment);
     const paymentId = response.insertId;
     logger.info("payment created with id " + response);
@@ -104,7 +105,7 @@ const getPayment = async function (req, res) {
     //   id,
     // ]);
     const payment = await mdb
-      .collection(COLLECTION_NAMES.PAYMENT)
+      .collection(COLLECTION.PAYMENT)
       .findOne({ _id: new ObjectId(paymentId) });
 
     if (!payment) {

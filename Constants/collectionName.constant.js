@@ -1,4 +1,4 @@
-const COLLECTION_NAMES = {
+const COLLECTION = {
   ADMIN: "admins",
   CART: "carts",
   CATEGORY: "categories",
@@ -11,14 +11,4 @@ const COLLECTION_NAMES = {
   REFRESH_TOKEN: "refreshToken",
 };
 
-export default COLLECTION_NAMES;
-/* 
-vendor
-cust
-payment
-category
-cart
-order
-product
-review
-*/
+export default COLLECTION;

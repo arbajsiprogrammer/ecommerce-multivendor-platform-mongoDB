@@ -1,6 +1,6 @@
-const ACCESS_TOKEN_NAME = "access-token";
+const ACCESS_TOKEN = "access-token";
 
-const REFRESH_TOKEN_NAME = "refresh-token";
+const REFRESH_TOKEN = "refresh-token";
 
 const ACCESS_TOKEN_EXPIRY = "1m";
 
@@ -21,8 +21,8 @@ const REFRESH_TOKEN_EXPIRY_OPTIONS = {
 };
 
 export {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
   ACCESS_TOKEN_EXPIRY_OPTIONS,

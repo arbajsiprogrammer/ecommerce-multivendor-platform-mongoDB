@@ -1,6 +1,6 @@
 import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
 } from "../Constants/authToken.constant.js";
 import { ROLES } from "../Constants/userRole.constant.js";
 import authSchema from "../model/authSchema.model.js";
@@ -74,8 +74,8 @@ const logout = async function (req, res) {
       return res.status(400).json({ message: "user not found" });
     }
 
-    res.clearCookie(ACCESS_TOKEN_NAME);
-    res.clearCookie(REFRESH_TOKEN_NAME);
+    res.clearCookie(ACCESS_TOKEN);
+    res.clearCookie(REFRESH_TOKEN);
 
     logger.info("Logout successful");
 
@@ -142,11 +142,11 @@ const logoutFromAllDevices = async function (req, res) {
       return res.status(400).json({ message: "user not found" });
     }
 
-    res.clearCookie(ACCESS_TOKEN_NAME);
-    res.clearCookie(REFRESH_TOKEN_NAME);
+    res.clearCookie(ACCESS_TOKEN);
+    res.clearCookie(REFRESH_TOKEN);
 
     const deleteResponse = await mdb
-      .collection(COLLECTION_NAMES.REFRESH_TOKEN)
+      .collection(COLLECTION.REFRESH_TOKEN)
       .deleteMany({ userId: user._id });
 
     logger.info("Logout successful");

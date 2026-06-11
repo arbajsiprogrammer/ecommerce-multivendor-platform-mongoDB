@@ -11,7 +11,7 @@ const getCartProducts = async function (req, res) {
     const customerId = req.user._id;
     console.log(customerId);
     const cartItems = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .find({ customerId })
       .toArray();
 
@@ -36,7 +36,7 @@ const getCartItem = async function (req, res) {
     const cartItemId = req.params.cartItemId;
 
     const existingCart = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .findOne({ customerId });
 
     if (!existingCart) {
@@ -74,7 +74,7 @@ const addToCart = async function (req, res) {
     const skuId = req.params.skuId;
 
     let existingCart = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .findOne({ customerId });
 
     console.log(existingCart, " existingCart inside add to cart");
@@ -84,13 +84,13 @@ const addToCart = async function (req, res) {
     if (!existingCart) {
       logger.info(`Cart created for customer id ${customerId}`);
       existingCart = await mdb
-        .collection(COLLECTION_NAMES.CART)
+        .collection(COLLECTION.CART)
         .insertOne({ customerId, cartItems: [] });
     }
 
     // check if product skus is available or not in the inventory
     const product = await mdb
-      .collection(COLLECTION_NAMES.PRODUCT)
+      .collection(COLLECTION.PRODUCT)
       .findOne({ _id: new ObjectId(productId) });
     console.log("product");
     console.log(product);
@@ -146,7 +146,7 @@ const addToCart = async function (req, res) {
     console.log(newCartItems);
 
     // add product sku
-    const response = await mdb.collection(COLLECTION_NAMES.CART).updateOne(
+    const response = await mdb.collection(COLLECTION.CART).updateOne(
       { customerId },
       {
         $set: {
@@ -156,9 +156,7 @@ const addToCart = async function (req, res) {
     );
 
     logger.info(`Product added to cart `);
-    console.log(
-      await mdb.collection(COLLECTION_NAMES.CART).findOne({ customerId }),
-    );
+    console.log(await mdb.collection(COLLECTION.CART).findOne({ customerId }));
 
     return res.status(200).json({ message: "Product added to cart", response });
   } catch (error) {
@@ -175,9 +173,7 @@ const updateCartItems = async function (req, res) {
     const cartItemId = req.params.cartItemId;
     const { productId, productSkuId, quantity } = req.body;
 
-    const cart = await mdb
-      .collection(COLLECTION_NAMES.CART)
-      .findOne({ customerId });
+    const cart = await mdb.collection(COLLECTION.CART).findOne({ customerId });
     console.log(" cart id inside update cart ");
     console.log(cart);
 
@@ -194,7 +190,7 @@ const updateCartItems = async function (req, res) {
 
     // check if product skus is available or not in the inventory
     const product = await mdb
-      .collection(COLLECTION_NAMES.PRODUCT)
+      .collection(COLLECTION.PRODUCT)
       .findOne({ _id: new ObjectId(productId) });
     console.log("product");
     console.log(product);
@@ -235,7 +231,7 @@ const updateCartItems = async function (req, res) {
     });
 
     // update the cart Items
-    const response = await mdb.collection(COLLECTION_NAMES.CART).updateOne(
+    const response = await mdb.collection(COLLECTION.CART).updateOne(
       { customerId },
       {
         $set: { cartItems: newCartItems },
@@ -258,7 +254,7 @@ const deleteCartItems = async function (req, res) {
     const cartItemId = req.params.cartItemId;
 
     const existingCart = await mdb
-      .collection(COLLECTION_NAMES.CART)
+      .collection(COLLECTION.CART)
       .findOne({ customerId });
 
     if (!existingCart) {
@@ -281,7 +277,7 @@ const deleteCartItems = async function (req, res) {
       (item) => item.id != cartItemId,
     );
 
-    const response = await mdb.collection(COLLECTION_NAMES.CART).updateOne(
+    const response = await mdb.collection(COLLECTION.CART).updateOne(
       { customerId },
       {
         $set: { cartItems: cartItems },

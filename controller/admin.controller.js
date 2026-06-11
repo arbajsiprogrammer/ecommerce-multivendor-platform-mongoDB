@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
-import COLLECTION_NAMES from "../Constants/collectionName.constant.js";
+import COLLECTION from "../Constants/collectionName.constant.js";
 
 // categories
 const getAllCategories = async function (req, res) {
@@ -18,7 +18,7 @@ const getAllCategories = async function (req, res) {
     }
 
     const categories = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .find({})
       .toArray();
 
@@ -47,7 +47,7 @@ const getCategory = async function (req, res) {
     }
 
     const category = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     if (!category) {
@@ -79,7 +79,7 @@ const updateCategory = async function (req, res) {
     }
 
     const existingCategory = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     console.log(existingCategory, "inside get category..");
@@ -89,7 +89,7 @@ const updateCategory = async function (req, res) {
       return res.status(400).json({ message: "category not found " });
     }
 
-    const row = await mdb.collection(COLLECTION_NAMES.CATEGORY).updateOne(
+    const row = await mdb.collection(COLLECTION.CATEGORY).updateOne(
       { _id: existingCategory._id },
       {
         $set: {
@@ -128,7 +128,7 @@ const addCategory = async function (req, res) {
     //   [category.category_name],
     // );
     const existingCategory = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .findOne({ categoryName: category.categoryName });
     console.log(existingCategory, "existing  category");
 
@@ -139,9 +139,7 @@ const addCategory = async function (req, res) {
       return res.status(400).json({ message: "category already exists" });
     }
 
-    const row = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
-      .insertOne(category);
+    const row = await mdb.collection(COLLECTION.CATEGORY).insertOne(category);
 
     logger.info("category added successfully");
     console.log(row, " row ");
@@ -170,7 +168,7 @@ const deleteCategory = async function (req, res) {
     }
 
     const existingCategory = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .findOne({ _id: new ObjectId(categoryId) });
 
     if (!existingCategory) {
@@ -181,7 +179,7 @@ const deleteCategory = async function (req, res) {
     console.log(existingCategory, "inside get category..");
 
     const response = await mdb
-      .collection(COLLECTION_NAMES.CATEGORY)
+      .collection(COLLECTION.CATEGORY)
       .deleteOne({ _id: existingCategory._id });
 
     logger.info("category deleted successfully with id: " + categoryId);
@@ -205,10 +203,7 @@ const getAllVendors = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const vendors = await mdb
-      .collection(COLLECTION_NAMES.VENDOR)
-      .find({})
-      .toArray();
+    const vendors = await mdb.collection(COLLECTION.VENDOR).find({}).toArray();
 
     logger.info(" vendor data fetched ");
     return res.status(200).json(vendors);
@@ -231,7 +226,7 @@ const getAllCustomers = async function (req, res) {
     }
 
     const customers = await mdb
-      .collection(COLLECTION_NAMES.CUSTOMER)
+      .collection(COLLECTION.CUSTOMER)
       .find({})
       .toArray();
 
@@ -255,10 +250,7 @@ const getAllOrders = async function (req, res) {
       return res.status(400).json({ message: "you are not allowed" });
     }
 
-    const orders = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
-      .find({})
-      .toArray();
+    const orders = await mdb.collection(COLLECTION.ORDER).find({}).toArray();
 
     logger.info("orders data fetched");
     return res.status(200).json(orders);
@@ -281,7 +273,7 @@ const getAllPayments = async function (req, res) {
     }
 
     const payments = await mdb
-      .collection(COLLECTION_NAMES.PAYMENT)
+      .collection(COLLECTION.PAYMENT)
       .find({})
       .toArray();
 

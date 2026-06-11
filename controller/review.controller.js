@@ -10,7 +10,7 @@ const addReview = async (req, res) => {
     console.log(req.body);
     const { productId, productSkusId, rating, review, orderId } = req.body;
     const product = await mdb
-      .collection(COLLECTION_NAMES.ORDER)
+      .collection(COLLECTION.ORDER)
       .find({ _id: new ObjectId(orderId), customerId })
       .toArray();
 
@@ -24,7 +24,7 @@ const addReview = async (req, res) => {
     }
 
     // adding review
-    const response = await mdb.collection(COLLECTION_NAMES.REVIEW).insertOne({
+    const response = await mdb.collection(COLLECTION.REVIEW).insertOne({
       customerId,
       productId,
       productSkusId,
@@ -51,7 +51,7 @@ const getAllReviews = async (req, res) => {
     const productId = req.params.productId;
 
     const reviews = await mdb
-      .collection(COLLECTION_NAMES.REVIEW)
+      .collection(COLLECTION.REVIEW)
       .find({ productId })
       .toArray();
 
