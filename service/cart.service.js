@@ -43,4 +43,17 @@ const validateAddToCart = async (productId) => {
     throw new Error("Product is already in cart");
   }
 };
-export { getExistingCart };
+
+const addProductToCart = async (customerId, newCartItems) => {
+  // add product sku
+  const response = await mdb.collection(COLLECTION.CART).updateOne(
+    { customerId },
+    {
+      $set: {
+        cartItems: [...newCartItems],
+      },
+    },
+  );
+  return response;
+};
+export { getExistingCart, validateAddToCart, addProductToCart };
