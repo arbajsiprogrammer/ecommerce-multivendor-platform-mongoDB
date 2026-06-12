@@ -6,7 +6,11 @@ import { db, mdb } from "../util/db.util.js";
 import { ObjectId } from "mongodb";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
-import { getExistingCart } from "../service/cart.service.js";
+import {
+  addProductToCart,
+  getExistingCart,
+  validateAddToCart,
+} from "../service/cart.service.js";
 
 // GET cart items of a cart
 const getCartProducts = async function (req, res) {
@@ -35,9 +39,7 @@ const getCartItem = async function (req, res) {
 
     return res.status(200).json({ cartItem });
   } catch (error) {
-    logger.error(`Error fetching cart item : ${error}`);
-    console.log(error);
-    return res.status(500).json({ message: error });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -68,29 +70,16 @@ const addToCart = async function (req, res) {
     // validate add to cart
     await validateAddToCart(productId);
 
+    // add product sku to cart
     const newCartItems = [
       ...existingCart.cartItems,
       { id: cartItemId, productId, productSkuId, quantity },
     ];
+    const response = await addProductToCart(customerId, newCartItems);
 
-    // add product sku
-    const response = await mdb.collection(COLLECTION.CART).updateOne(
-      { customerId },
-      {
-        $set: {
-          cartItems: [...newCartItems],
-        },
-      },
-    );
-
-    logger.info(`Product added to cart `);
-    console.log(await mdb.collection(COLLECTION.CART).findOne({ customerId }));
-
-    return res.status(200).json({ message: "Product added to cart", response });
+    successResponse(res, 200, "Product added to cart", response);
   } catch (error) {
-    logger.error(`Error adding product to cart: ${error}`);
-    console.log(error);
-    return res.status(500).json({ message: error });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -169,9 +158,7 @@ const updateCartItems = async function (req, res) {
     logger.info(`Cart item updated for customer id ${customerId}`);
     return res.status(200).json({ message: "Product updated", response });
   } catch (error) {
-    logger.error(`Error updating cart item: ${error}`);
-    console.log(error);
-    return res.status(500).json({ message: error });
+    errorResponse(res, 500, error.message);
   }
 };
 
@@ -214,9 +201,7 @@ const deleteCartItems = async function (req, res) {
 
     return res.status(200).json(response);
   } catch (error) {
-    logger.error(`Error deleting cart item: ${error}`);
-    console.log(error);
-    return res.status(500).json({ message: error });
+    errorResponse(res, 500, error.message);
   }
 };
 
