@@ -34,7 +34,7 @@ const deleteUser = async function (req, res) {
 
     successResponse(res, 200, "User deleted successfully", deletedUser);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -55,7 +55,7 @@ const logout = async function (req, res) {
 
     successResponse(res, 200, "logout successfully", null);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -75,7 +75,7 @@ const profile = async function (req, res) {
       existingUser,
     );
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -102,7 +102,7 @@ const logoutFromAllDevices = async function (req, res) {
       existingUser,
     );
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 export { deleteUser, logout, profile, logoutFromAllDevices };

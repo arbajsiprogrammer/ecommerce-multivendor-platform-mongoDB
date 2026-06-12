@@ -10,7 +10,7 @@ const validateVendorRole = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 
@@ -37,7 +37,7 @@ const validateProduct = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 export { validateVendorRole, validateProduct };

@@ -40,7 +40,7 @@ const addReview = async (req, res) => {
     console.log(response, " review row inside addReview");
     return res.status(200).json({ message: "Review added successfully" });
   } catch (error) {
-    logger.error(`Error in addReview: ${error.message}`);
+    logger.error(`Error in addReview: ${error}`);
     console.error("Error in addReview:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -64,7 +64,7 @@ const getAllReviews = async (req, res) => {
     );
     return res.status(200).json(reviews);
   } catch (error) {
-    logger.error(`Error in getAllReviews: ${error.message}`);
+    logger.error(`Error in getAllReviews: ${error}`);
     console.error("Error in getAllReviews:", error);
     res.status(500).json({ message: "Internal server error" });
   }

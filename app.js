@@ -34,7 +34,7 @@ app.use((req, res) => {
 
 // global error handler
 app.use((error, req, res, next) => {
-  return errorResponse(res, 500, error.message || "internal server error ");
+  return errorResponse(res, 500, error || "internal server error ");
 });
 
 const PORT = process.env.PORT;

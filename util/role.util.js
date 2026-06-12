@@ -22,7 +22,7 @@ const createRoles = async () => {
 
     console.log(`roles collection created ${JSON.stringify(response)}`);
   } catch (error) {
-    logger.error(`error inside createRoles ${error.message}`);
+    logger.error(`error inside createRoles ${error}`);
   }
 };
 

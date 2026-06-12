@@ -45,7 +45,7 @@ const signup = async function (req, res) {
 
     successResponse(res, 200, "User created successfully", response);
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 
@@ -84,7 +84,7 @@ const login = async function (req, res) {
 
     successResponse(res, 200, "Login successful", existingUser);
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 
@@ -112,7 +112,7 @@ const refreshToken = async function (req, res) {
       refreshToken,
     });
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 

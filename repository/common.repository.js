@@ -6,7 +6,7 @@ const insertOne = async (collectionName, data) => {
     const response = await mdb.collection(collectionName).insertOne(data);
     return response;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 
@@ -22,10 +22,7 @@ const findOne = async (collectionName, fields) => {
 };
 
 const find = async (collectionName, fields = {}) => {
-  const response = await mdb
-    .collection(collectionName)
-    .findOne(fields)
-    .toArray();
+  const response = await mdb.collection(collectionName).find(fields).toArray();
 
   if (response.length == 0) {
     throw new Error(

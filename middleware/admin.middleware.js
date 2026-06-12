@@ -11,7 +11,7 @@ const checkRole = async (req, res, next) => {
 
     next();
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 

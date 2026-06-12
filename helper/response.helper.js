@@ -17,19 +17,20 @@ const successResponse = function (res, statusCode, message, data) {
   });
 };
 
-const errorResponse = function (res, statusCode, message) {
+const errorResponse = function (res, statusCode, error) {
   logger.error(
     JSON.stringify({
       success: false,
       statusCode: statusCode,
-      message: message,
+      message: error.message || error,
+      stack: error.stack,
       data: null,
     }),
   );
   return res.status(statusCode).json({
     success: false,
     statusCode: statusCode,
-    message: message,
+    message: error.message || error,
     data: null,
   });
 };

@@ -10,7 +10,7 @@
 //     }
 //   } catch (error) {
 //     console.log(error);
-//     return res.status(500).json({ message: error.message });
+//     return res.status(500).json({ message: error });
 //   }
 // };
 // const getAllProducts = async function (req, res) {
@@ -35,7 +35,7 @@
 //     return res.status(200).json(products);
 //   } catch (error) {
 //     console.log(error);
-//     return res.status(500).json({ message: error.message });
+//     return res.status(500).json({ message: error });
 //   }
 // };
 

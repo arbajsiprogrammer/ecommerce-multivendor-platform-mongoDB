@@ -2,13 +2,12 @@ import { ObjectId } from "mongodb";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import {
   deleteOne,
+  find,
   findById,
-  findOne,
   insertOne,
 } from "../repository/common.repository.js";
 import {
   findByName,
-  updateCategory,
   updateCategoryById,
 } from "../repository/category.repository.js";
 
@@ -29,7 +28,7 @@ const addCategoryService = async (category) => {
   const existingCategory = await findByName(category.categoryName);
 
   if (existingCategory) {
-    throw new Error(`category with name ${categoryName} found`);
+    throw new Error(`category with name ${category.categoryName} found`);
   }
 
   const response = await insertOne(COLLECTION.CATEGORY, category);
@@ -47,9 +46,21 @@ const deleteCategoryService = async (categoryId) => {
   return response;
 };
 
+const getCategoryService = async (categoryId) => {
+  const category = await findById(COLLECTION.CATEGORY, {
+    _id: categoryId,
+  });
+  return category;
+};
+const getCategoriesService = async () => {
+  const category = await find(COLLECTION.CATEGORY, {});
+  return category;
+};
 export {
   isCategoryExist,
   updateCategoryService,
   addCategoryService,
   deleteCategoryService,
+  getCategoryService,
+  getCategoriesService,
 };

@@ -3,6 +3,7 @@ import logger from "../service/log.service.js";
 import { mdb, db } from "../util/db.util.js";
 import { ObjectId } from "mongodb";
 import { getAllPaymentsService } from "../service/payment.service.js";
+import { errorResponse, successResponse } from "../helper/response.helper.js";
 
 const addPayment = async function (req, res) {
   const session = await mongoose.startSession();
@@ -92,7 +93,7 @@ const addPayment = async function (req, res) {
   } catch (error) {
     session.abortTransaction();
     console.log(error);
-    logger.error("Error inside addPayment " + error.message);
+    logger.error("Error inside addPayment " + error);
     return res.status(500).json({ message: " internal server error " });
   } finally {
     session.endSession();
@@ -117,7 +118,7 @@ const getPayment = async function (req, res) {
     return res.status(200).json(payment);
   } catch (error) {
     console.log(error);
-    logger.error("Error inside addPayment " + error.message);
+    logger.error("Error inside addPayment " + error);
     return res.status(500).json({ message: " internal server error " });
   }
 };
@@ -129,7 +130,7 @@ const getAllPayments = async function (req, res) {
 
     successResponse(res, 200, "payments data fetched", payments);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 

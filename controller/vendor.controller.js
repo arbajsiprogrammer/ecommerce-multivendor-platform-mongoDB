@@ -18,7 +18,7 @@ const getAllVendors = async function (req, res) {
 
     successResponse(res, 200, "vendor data fetched", vendors);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -35,7 +35,7 @@ const addProduct = async function (req, res) {
 
     successResponse(res, 200, "product added successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 const getAllProducts = async function (req, res) {
@@ -49,7 +49,7 @@ const getAllProducts = async function (req, res) {
 
     successResponse(res, 200, "products fetch successfully", products);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -65,7 +65,7 @@ const getProduct = async function (req, res) {
 
     successResponse(res, 200, "product fetch successfully", products);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -88,7 +88,7 @@ const deleteProduct = async function (req, res) {
 
     successResponse(res, 200, "product deleted successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -113,7 +113,7 @@ const updateProduct = async function (req, res) {
 
     successResponse(res, 200, "product updated successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -139,7 +139,7 @@ const getAllSKU = async function (req, res) {
       productSkus,
     );
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -169,7 +169,7 @@ const addSKU = async function (req, res) {
 
     successResponse(res, 200, "product added successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -194,7 +194,7 @@ const updateSKU = async function (req, res) {
 
     successResponse(res, 200, "product SKU updated", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -223,7 +223,7 @@ const deleteSKU = async function (req, res) {
 
     successResponse(res, 200, "product SKU deleted", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -264,7 +264,7 @@ const addImage = async function (req, res) {
 
     successResponse(res, 200, "product SKU image added ", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -289,7 +289,7 @@ const getImages = async function (req, res) {
 
     successResponse(res, 200, "Images retrieved successfully", images);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -326,7 +326,7 @@ const deleteImage = async function (req, res) {
 
     successResponse(res, 200, "sku images updated successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -360,7 +360,7 @@ const updateOrderStatus = async (req, res) => {
 
     successResponse(res, 200, "Order status updated successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 

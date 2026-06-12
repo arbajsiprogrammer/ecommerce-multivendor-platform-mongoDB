@@ -3,6 +3,7 @@ import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import mongoose from "mongoose";
 import { getAllOrdersService } from "../service/order.service.js";
+import { errorResponse, successResponse } from "../helper/response.helper.js";
 
 // add item to order
 const addItemToOrder = async (req, res) => {
@@ -128,7 +129,7 @@ const addItemToOrder = async (req, res) => {
       .status(200)
       .json({ message: "Order created successfully", response });
   } catch (error) {
-    logger.error(`Error in addItemToOrder: ${error.message}`);
+    logger.error(`Error in addItemToOrder: ${error}`);
     console.error("Error in addItemToOrder:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -159,7 +160,7 @@ const getOrder = async (req, res) => {
 
     return res.status(200).json(order);
   } catch (error) {
-    logger.error(`Error in getOrder: ${error.message}`);
+    logger.error(`Error in getOrder: ${error}`);
     console.log("Error in getOrder:", error);
 
     res.status(500).json({ message: "Internal server error" });
@@ -172,7 +173,7 @@ const getAllOrders = async function (req, res) {
 
     successResponse(res, 200, "orders data fetched", orders);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 export { addItemToOrder, getAllOrders, getOrder };

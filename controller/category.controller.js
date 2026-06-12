@@ -6,6 +6,8 @@ import { errorResponse, successResponse } from "../helper/response.helper.js";
 import {
   addCategoryService,
   deleteCategoryService,
+  getCategoriesService,
+  getCategoryService,
   isCategoryExist,
   updateCategoryService,
 } from "../service/category.service.js";
@@ -15,25 +17,22 @@ import { findByName } from "../repository/category.repository.js";
 // categories
 const getAllCategories = async function (req, res) {
   try {
-    const categories = await find(COLLECTION.CATEGORY);
+    const categories = await getCategoriesService();
 
     successResponse(res, 200, "categories fetched successfully", categories);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
 const getCategory = async function (req, res) {
   try {
     const categoryId = req.params.categoryId;
-
-    const category = await findById(COLLECTION.CATEGORY, {
-      _id: categoryId,
-    });
+    const category = await getCategoryService(categoryId);
 
     successResponse(res, 200, "category fetched successfully", category);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -54,7 +53,7 @@ const updateCategory = async function (req, res) {
       response,
     );
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -66,7 +65,7 @@ const addCategory = async function (req, res) {
 
     successResponse(res, 200, "category added successfully", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -78,7 +77,7 @@ const deleteCategory = async function (req, res) {
 
     successResponse(res, 200, "category deleted ", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 

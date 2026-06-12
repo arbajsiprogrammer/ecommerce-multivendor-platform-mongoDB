@@ -18,7 +18,7 @@ const getAllProducts = async function (req, res) {
 
     successResponse(res, 200, "fetched product successfully", products);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -34,7 +34,7 @@ const getProduct = async function (req, res) {
 
     successResponse(res, 200, "fetched product successfully", products);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -58,7 +58,7 @@ const getProductsByCategory = async function (req, res) {
       products,
     );
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -76,7 +76,7 @@ const getProductsByPage = async function (req, res) {
 
     successResponse(res, 200, "fetched products", products);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -86,7 +86,7 @@ const getAllCustomers = async function (req, res) {
     const customers = await getAllCustomersService();
     successResponse(res, 200, "customers data fetched", customers);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 export {

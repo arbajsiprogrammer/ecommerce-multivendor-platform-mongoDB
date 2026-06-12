@@ -52,7 +52,7 @@ const verifyRefreshToken = async (token) => {
 
     return user;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 // hashing password
@@ -112,7 +112,7 @@ const createTokens = async function (payload) {
 
     return { accessToken, refreshToken };
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 
@@ -143,7 +143,7 @@ const getRoleId = async (role) => {
     const roleId = response._id;
     return roleId;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 
@@ -159,7 +159,7 @@ const createUser = async (user) => {
       return response;
     }
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 

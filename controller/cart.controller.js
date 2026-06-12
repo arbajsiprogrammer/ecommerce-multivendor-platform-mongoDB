@@ -21,7 +21,7 @@ const getCartProducts = async function (req, res) {
 
     successResponse(res, 200, "cart items fetched successfully", cartItems);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -39,7 +39,7 @@ const getCartItem = async function (req, res) {
 
     return res.status(200).json({ cartItem });
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -79,7 +79,7 @@ const addToCart = async function (req, res) {
 
     successResponse(res, 200, "Product added to cart", response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -158,7 +158,7 @@ const updateCartItems = async function (req, res) {
     logger.info(`Cart item updated for customer id ${customerId}`);
     return res.status(200).json({ message: "Product updated", response });
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -201,7 +201,7 @@ const deleteCartItems = async function (req, res) {
 
     return res.status(200).json(response);
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 

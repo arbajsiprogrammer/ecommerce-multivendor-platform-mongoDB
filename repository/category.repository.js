@@ -4,7 +4,7 @@ import { mdb } from "../util/db.util.js";
 const findByName = async (categoryName) => {
   const response = await mdb
     .collection(COLLECTION.CATEGORY)
-    .find({ categoryName });
+    .findOne({ categoryName });
 
   return response;
 };
@@ -24,7 +24,7 @@ const updateCategoryById = async (existingCategory, category) => {
 
     return response;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 

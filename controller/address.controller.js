@@ -46,7 +46,7 @@ const addPickupAddress = async function (req, res) {
       .status(200)
       .json({ message: "Pickup address added successfully" });
   } catch (error) {
-    logger.error(`Error adding pickup address: ${error.message}`); // Log error message
+    logger.error(`Error adding pickup address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -79,7 +79,7 @@ const getPickupAddress = async function (req, res) {
     // Log successful retrieval of pickup addresses
     return res.status(200).json(pickupAddress);
   } catch (error) {
-    logger.error(`Error retrieving pickup addresses: ${error.message}`); // Log error message
+    logger.error(`Error retrieving pickup addresses: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -139,7 +139,7 @@ const updatePickupAddress = async function (req, res) {
       .status(200)
       .json({ message: "Pickup address updated successfully" });
   } catch (error) {
-    logger.error(`Error updating pickup address: ${error.message}`); // Log error message
+    logger.error(`Error updating pickup address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -187,7 +187,7 @@ const deletePickupAddress = async function (req, res) {
       .status(200)
       .json({ message: "Pickup address deleted successfully" });
   } catch (error) {
-    logger.error(`Error deleting pickup address: ${error.message}`); // Log error message
+    logger.error(`Error deleting pickup address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -238,7 +238,7 @@ const addDeliveryAddress = async function (req, res) {
       .status(200)
       .json({ message: "Delivery address added successfully" });
   } catch (error) {
-    logger.error(`Error adding delivery address: ${error.message}`); // Log error message
+    logger.error(`Error adding delivery address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -272,7 +272,7 @@ const getDeliveryAddress = async function (req, res) {
     ); // Log successful retrieval of delivery addresses
     return res.status(200).json(deliveryAddress);
   } catch (error) {
-    logger.error(`Error retrieving delivery addresses: ${error.message}`); // Log error message
+    logger.error(`Error retrieving delivery addresses: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -330,7 +330,7 @@ const updateDeliveryAddress = async function (req, res) {
       .status(200)
       .json({ message: "Delivery address added successfully" });
   } catch (error) {
-    logger.error(`Error adding delivery address: ${error.message}`); // Log error message
+    logger.error(`Error adding delivery address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }
@@ -381,7 +381,7 @@ const deleteDeliveryAddress = async function (req, res) {
       .status(200)
       .json({ message: "Delivery address added successfully" });
   } catch (error) {
-    logger.error(`Error adding delivery address: ${error.message}`); // Log error message
+    logger.error(`Error adding delivery address: ${error}`); // Log error message
     console.error(error);
     return res.status(500).json({ message: " Internal server error " });
   }

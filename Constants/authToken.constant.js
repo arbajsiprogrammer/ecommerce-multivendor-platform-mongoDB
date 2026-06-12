@@ -2,7 +2,7 @@ const ACCESS_TOKEN = "access-token";
 
 const REFRESH_TOKEN = "refresh-token";
 
-const ACCESS_TOKEN_EXPIRY = "1m";
+const ACCESS_TOKEN_EXPIRY = "10m";
 
 const REFRESH_TOKEN_EXPIRY = "7d";
 

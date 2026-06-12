@@ -30,7 +30,7 @@ const verifyAuthToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    errorResponse(res, 500, error.message);
+    errorResponse(res, 500, error);
   }
 };
 
@@ -54,7 +54,7 @@ const validateSignup = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 
@@ -71,7 +71,7 @@ const validateRole = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return errorResponse(res, 500, error.message);
+    return errorResponse(res, 500, error);
   }
 };
 
