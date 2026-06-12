@@ -3,7 +3,7 @@ import { mdb } from "../util/db.util.js";
 import bcrypt from "bcryptjs";
 import logger from "../service/log.service.js";
 import { ObjectId } from "mongodb";
-import { insertOne } from "../repository/auth.repository.js";
+import { insertOne } from "../repository/common.repository.js";
 import jwt from "jsonwebtoken";
 import {
   ACCESS_TOKEN_EXPIRY,
@@ -16,7 +16,7 @@ const generateToken = async (payload) => {
   const accessToken = await jwt.sign(payload, secretKey, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
   });
-
+  console.log("accessToken ", accessToken);
   if (!accessToken) {
     throw new Error("Access Token generation failed");
   }

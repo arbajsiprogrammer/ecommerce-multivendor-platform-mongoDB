@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import logger from "../service/log.service.js";
 import { mdb, db } from "../util/db.util.js";
 import { ObjectId } from "mongodb";
+import { getAllPaymentsService } from "../service/payment.service.js";
 
 const addPayment = async function (req, res) {
   const session = await mongoose.startSession();
@@ -101,9 +102,7 @@ const addPayment = async function (req, res) {
 const getPayment = async function (req, res) {
   try {
     const paymentId = req.params.paymentId;
-    // const [payment] = await db.execute(`select * from payments where id = ?`, [
-    //   id,
-    // ]);
+
     const payment = await mdb
       .collection(COLLECTION.PAYMENT)
       .findOne({ _id: new ObjectId(paymentId) });
@@ -123,4 +122,15 @@ const getPayment = async function (req, res) {
   }
 };
 
-export { getPayment, addPayment };
+// payments
+const getAllPayments = async function (req, res) {
+  try {
+    const payments = await getAllPaymentsService();
+
+    successResponse(res, 200, "payments data fetched", payments);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
+
+export { getPayment, addPayment, getAllPayments };

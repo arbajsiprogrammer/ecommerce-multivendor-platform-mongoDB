@@ -5,13 +5,18 @@ import {
 import { ROLES } from "../Constants/userRole.constant.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 import authSchema from "../model/authSchema.model.js";
+import { deleteById, deleteOne } from "../repository/common.repository.js";
 import {
+  deleteRefreshToken,
   hashPassword,
   verifyPassword,
   verifyRefreshToken,
 } from "../service/auth.service.js";
 import logger from "../service/log.service.js";
-import { isUserExists } from "../service/userProfile.service.js";
+import {
+  getCollectionName,
+  isUserExists,
+} from "../service/userProfile.service.js";
 import { db, mdb } from "../util/db.util.js";
 import { ObjectId } from "mongodb";
 
@@ -23,13 +28,11 @@ const deleteUser = async function (req, res) {
 
     await isUserExists(_id, role);
 
-    if (role) {
-      const deletedUser = await mdb
-        .collection(`${role}s`)
-        .deleteOne({ _id: new ObjectId(_id) });
+    const collectionName = await getCollectionName(role);
 
-      successResponse(res, 200, "User deleted successfully", deleteUser);
-    }
+    const deletedUser = await deleteById(collectionName, { _id });
+
+    successResponse(res, 200, "User deleted successfully", deletedUser);
   } catch (error) {
     errorResponse(res, 500, error.message);
   }
@@ -40,8 +43,12 @@ const logout = async function (req, res) {
     const user = req.user;
     const role = req.user.role;
     const _id = req.user._id;
+
     // check if user exist or not
     await isUserExists(_id, role);
+
+    // delete refresh token from DB
+    await deleteRefreshToken(user);
 
     res.clearCookie(ACCESS_TOKEN);
     res.clearCookie(REFRESH_TOKEN);
@@ -55,7 +62,6 @@ const logout = async function (req, res) {
 const profile = async function (req, res) {
   try {
     const user = req.user;
-    console.log("*********", req.user);
     const _id = user._id;
     const role = user.role;
 

@@ -16,26 +16,26 @@ import {
   deleteOne,
   findOne,
   insertOne,
-} from "../repository/auth.repository.js";
+} from "../repository/common.repository.js";
+import { getCollectionName } from "./userProfile.service.js";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
-const secretKey = process.env.JWT_SECRET_KEY;
-const refresh_secretKey = process.env.JWT_REFRESH_SECRET_KEY;
-
 const verifyToken = async (token) => {
   try {
+    const secretKey = process.env.JWT_SECRET_KEY;
     const user = await jwt.verify(token, secretKey);
-
     return user;
   } catch (error) {
-    console.log(error);
+    console.log("******Error************ : ", error);
   }
 };
 
 const verifyRefreshToken = async (token) => {
   try {
-    const user = await jwt.verify(token, refresh_secretKey);
+    const refreshSecretKey = process.env.JWT_REFRESH_SECRET_KEY;
+    const user = await jwt.verify(token, refreshSecretKey);
 
     if (!user) {
       throw new Error("refresh token verification failed");
@@ -78,23 +78,17 @@ const verifyPassword = async function (password, hashed_password) {
 
 const findUserByPhone = async (role, phoneNumber) => {
   try {
-    let existingUser;
     // check if user is already exist or not
-    if (role == "admin" || role == "vendor") {
-      const collectionName = COLLECTION.PLATFORM_USER;
-      const fields = { phoneNumber };
+    const name = getCollectionName(role);
 
-      existingUser = await findOne(collectionName, fields);
-    } else {
-      const collectionName = COLLECTION.CUSTOMER;
-      const fields = { phoneNumber };
+    const fields = { phoneNumber };
 
-      existingUser = await findOne(collectionName, fields);
-    }
+    const existingUser = await findOne(name, fields);
 
     logger.warn(
       `existing user in findUserByPhone ${JSON.stringify(existingUser)}`,
     );
+
     return existingUser;
   } catch (error) {
     logger.error(`internal server error.... ${error}`);

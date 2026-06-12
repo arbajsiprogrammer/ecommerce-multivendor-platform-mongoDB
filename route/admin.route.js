@@ -1,18 +1,19 @@
 import express from "express";
 import { db } from "../util/db.util.js";
 import { verifyAuthToken } from "../middleware/auth.middleware.js";
+
+import { checkRole } from "../middleware/admin.middleware.js";
 import {
   addCategory,
   deleteCategory,
   getAllCategories,
-  getAllCustomers,
-  getAllOrders,
-  getAllPayments,
-  getAllVendors,
   getCategory,
   updateCategory,
-} from "../controller/admin.controller.js";
-import { checkRole } from "../middleware/admin.middleware.js";
+} from "../controller/category.controller.js";
+import { getAllVendors } from "../controller/vendor.controller.js";
+import { getAllCustomers } from "../controller/customer.controller.js";
+import { getAllOrders } from "../controller/order.controller.js";
+import { getAllPayments } from "../controller/payment.controller.js";
 
 const router = express.Router();
 

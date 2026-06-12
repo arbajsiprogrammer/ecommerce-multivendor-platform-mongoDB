@@ -1,6 +1,12 @@
 import { ObjectId } from "mongodb";
 import { mdb } from "../util/db.util.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
+import { find } from "../repository/common.repository.js";
+
+const getAllVendorsService = async () => {
+  const response = await find(COLLECTION.PLATFORM_USER, {});
+  return response;
+};
 
 const getExistingProduct = async (vendorId, productId) => {
   const existingProduct = await mdb
@@ -28,4 +34,5 @@ const updateProductSku = async (tempSkus, skuId, productId) => {
     );
   return response;
 };
-export { getExistingProduct, updateProductSku };
+
+export { getExistingProduct, updateProductSku, getAllVendorsService };

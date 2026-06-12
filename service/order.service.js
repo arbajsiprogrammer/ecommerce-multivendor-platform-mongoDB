@@ -11,4 +11,9 @@ const getExistingOrders = async (orderId) => {
   }
 };
 
-export { getExistingOrders };
+const getAllOrdersService = async () => {
+  const response = await find(COLLECTION.ORDER, {});
+  return response;
+};
+
+export { getExistingOrders, getAllOrdersService };

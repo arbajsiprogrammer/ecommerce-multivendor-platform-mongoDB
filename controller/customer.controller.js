@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
+import { getAllCustomersService } from "../service/customer.service.js";
 
 const getAllProducts = async function (req, res) {
   try {
@@ -79,4 +80,19 @@ const getProductsByPage = async function (req, res) {
   }
 };
 
-export { getAllProducts, getProduct, getProductsByCategory, getProductsByPage };
+// customers
+const getAllCustomers = async function (req, res) {
+  try {
+    const customers = await getAllCustomersService();
+    successResponse(res, 200, "customers data fetched", customers);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
+export {
+  getAllProducts,
+  getProduct,
+  getProductsByCategory,
+  getProductsByPage,
+  getAllCustomers,
+};

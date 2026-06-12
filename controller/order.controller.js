@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import mongoose from "mongoose";
+import { getAllOrdersService } from "../service/order.service.js";
 
 // add item to order
 const addItemToOrder = async (req, res) => {
@@ -133,31 +134,6 @@ const addItemToOrder = async (req, res) => {
   }
 };
 
-// get all orders
-const getAllOrders = async (req, res) => {
-  try {
-    const customerId = req.user._id;
-    const role = req.user.role;
-
-    const orders = await mdb.collection(COLLECTION.ORDER).find({}).toArray();
-
-    console.log(orders, " all orders for customer id inside getAllOrders");
-
-    if (orders.length == 0) {
-      logger.error(`No orders found for customer id ${customerId}`);
-      return res.status(400).json({ message: "No orders found " });
-    }
-
-    logger.info(`Orders retrieved successfully for customer id ${customerId}`);
-
-    return res.status(200).json({ orders: orders });
-  } catch (error) {
-    logger.error(`Error in getAllOrders: ${error.message}`);
-    console.log("Error in getAllOrders:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 // get order
 const getOrder = async (req, res) => {
   try {
@@ -189,5 +165,14 @@ const getOrder = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+// orders
+const getAllOrders = async function (req, res) {
+  try {
+    const orders = await getAllOrdersService();
 
+    successResponse(res, 200, "orders data fetched", orders);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
 export { addItemToOrder, getAllOrders, getOrder };

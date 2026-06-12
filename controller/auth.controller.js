@@ -54,6 +54,7 @@ const login = async function (req, res) {
     const { phoneNumber, password, role } = req.body;
 
     const existingUser = await findUserByPhone(role, phoneNumber);
+
     if (!existingUser) {
       return errorResponse(res, 400, "Invalid credentials...user not found");
     }
@@ -75,10 +76,10 @@ const login = async function (req, res) {
       roleId: existingUser.roleId,
       _id: existingUser._id,
     };
-    const { AccessToken, refreshToken } = await createTokens(payload);
-
+    const { accessToken, refreshToken } = await createTokens(payload);
+    console.error("AccessToken", accessToken, "refreshToken", refreshToken);
     // store tokens into the cookies
-    res.cookie(ACCESS_TOKEN, AccessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
+    res.cookie(ACCESS_TOKEN, accessToken, ACCESS_TOKEN_EXPIRY_OPTIONS);
     res.cookie(REFRESH_TOKEN, refreshToken, REFRESH_TOKEN_EXPIRY_OPTIONS);
 
     successResponse(res, 200, "Login successful", existingUser);

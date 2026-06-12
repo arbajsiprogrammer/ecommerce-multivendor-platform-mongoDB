@@ -8,16 +8,21 @@ import { ROLES } from "../Constants/userRole.constant.js";
 const verifyAuthToken = async (req, res, next) => {
   try {
     const token = req.cookies[ACCESS_TOKEN];
-
+    console.log(token, "token  inside verifyAuthToken");
     let user = null;
     if (!token) {
-      errorResponse(res, 401, "Access token not found");
+      return errorResponse(res, 401, "Access token not found");
     }
 
     user = await verifyToken(token);
+    console.log(user, "user inside verifyAuthToken");
 
     if (!user) {
-      errorResponse(res, 401, "Access token verification failed");
+      return errorResponse(
+        res,
+        401,
+        "Access token verification failed from middleware" + user,
+      );
     }
 
     req.user = user;

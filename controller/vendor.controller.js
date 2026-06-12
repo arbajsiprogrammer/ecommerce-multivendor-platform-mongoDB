@@ -5,10 +5,22 @@ import { db, mdb } from "../util/db.util.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import {
+  getAllVendorsService,
   getExistingProduct,
   updateProductSku,
 } from "../service/vendor.service.js";
 import { getExistingOrders } from "../service/order.service.js";
+
+//vendors
+const getAllVendors = async function (req, res) {
+  try {
+    const vendors = await getAllVendorsService();
+
+    successResponse(res, 200, "vendor data fetched", vendors);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
 
 // products API's
 const addProduct = async function (req, res) {
@@ -130,32 +142,6 @@ const getAllSKU = async function (req, res) {
     errorResponse(res, 500, error.message);
   }
 };
-
-// const   = async function (req, res) {
-//   try {
-//     const id = req.params.id;
-//     const productId = req.params.id;
-
-//     let product;
-
-//       // showing only the vendors product
-//       [product] = await db.execute(
-//         `select * from product_skus where id = ?  `,
-//         [id],
-//       );
-//     }
-
-//     console.log(product, " SKU  ");
-
-//     if (!product) {
-//       errorResponse(res, 400, "product not found");
-//     }
-
-//     successResponse(res, 200, "product  SKUs retrieved  successfully", product);
-//   } catch (error) {
-//     errorResponse(res, 500, error.message);
-//   }
-// };
 
 const addSKU = async function (req, res) {
   try {
@@ -398,4 +384,5 @@ export {
 
   // update order status
   updateOrderStatus,
+  getAllVendors,
 };
