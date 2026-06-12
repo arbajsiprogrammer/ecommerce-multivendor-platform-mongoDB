@@ -32,9 +32,10 @@ const connectDB = async function () {
 };
 
 let mdb;
-const URI = process.env.MONGODB_URI;
+
 const connectMongo = async function () {
   try {
+    const URI = process.env.MONGODB_URI;
     const response = await mongoose.connect(URI);
     mdb = await mongoose.connection.db;
     console.log("db connected", mdb.databaseName);

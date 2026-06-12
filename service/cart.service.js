@@ -1,5 +1,5 @@
 import COLLECTION from "../Constants/collectionName.constant.js";
-import { errorResponse } from "../helper/response.helper";
+import { errorResponse } from "../helper/response.helper.js";
 
 const getExistingCart = async (customerId) => {
   const existingCart = await mdb

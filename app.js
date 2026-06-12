@@ -8,6 +8,7 @@ import { db } from "./util/db.util.js";
 import apiRoute from "./route/api.route.js";
 import cors_options from "./service/cors.service.js";
 import { errorResponse } from "./helper/response.helper.js";
+import { createRoles } from "./util/role.util.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 
 // connectDB();
 connectMongo();
+// createRoles();
 // unknown routes handler
 app.use((req, res) => {
   return errorResponse(res, 404, "route not found 404");

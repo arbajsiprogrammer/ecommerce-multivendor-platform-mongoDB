@@ -1,8 +1,4 @@
-import {
-  generateToken,
-  verifyRefreshToken,
-  verifyToken,
-} from "../service/auth.service.js";
+import { verifyToken } from "../service/auth.service.js";
 import logger from "../service/log.service.js";
 import { ACCESS_TOKEN } from "../Constants/authToken.constant.js";
 import authSchema from "../model/authSchema.model.js";
@@ -11,40 +7,31 @@ import { ROLES } from "../Constants/userRole.constant.js";
 
 const verifyAuthToken = async (req, res, next) => {
   try {
-    console.log("inside verifyAuthToken");
     const token = req.cookies[ACCESS_TOKEN];
-    console.log(token, "inside verify Auth Token");
 
     let user = null;
     if (!token) {
-      logger.error(" Access token not found ");
-      return res.status(401).json({ message: " Access token not found " });
+      errorResponse(res, 401, "Access token not found");
     }
 
     user = await verifyToken(token);
 
     if (!user) {
-      logger.error("Access token verification failed");
-      return res
-        .status(401)
-        .json({ message: "Access token verification failed" });
+      errorResponse(res, 401, "Access token verification failed");
     }
 
-    if (user) {
-      req.user = user;
-      req.userId = user._id;
-      return next();
-    }
+    req.user = user;
+    req.userId = user._id;
+
+    next();
   } catch (error) {
-    logger.error(error);
-    return res.status(500).json({ message: error.message });
+    errorResponse(res, 500, error.message);
   }
 };
 
 const validateSignup = async (req, res, next) => {
   try {
     const user = req.body;
-    logger.info(req.body, "inside validateSignup middleware...");
 
     const testUser = {
       phoneNumber: user.phoneNumber,
@@ -57,9 +44,6 @@ const validateSignup = async (req, res, next) => {
     const result = authSchema.validate(testUser);
 
     if (result.error) {
-      logger.error(
-        result.error.details[0].message + " in validateSignup middleware",
-      );
       return errorResponse(res, 400, result.error.details[0].message);
     }
 
@@ -72,17 +56,14 @@ const validateSignup = async (req, res, next) => {
 const validateRole = async (req, res, next) => {
   try {
     const user = req.user || req.body;
-    console.log("*********", req.user);
 
     // check if role is valid or not
     const validRole = ROLES.includes(user.role);
 
     if (!validRole) {
-      return res.status(400).json({
-        message: "Invalid role",
-      });
       return errorResponse(res, 400, "Invalid role");
     }
+
     next();
   } catch (error) {
     return errorResponse(res, 500, error.message);

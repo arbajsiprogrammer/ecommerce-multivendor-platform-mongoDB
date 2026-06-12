@@ -1,4 +1,5 @@
 const COLLECTION = {
+  PLATFORM_USER: "platformUser",
   ADMIN: "admins",
   CART: "carts",
   CATEGORY: "categories",
@@ -9,6 +10,7 @@ const COLLECTION = {
   REVIEW: "reviews",
   VENDOR: "vendors",
   REFRESH_TOKEN: "refreshToken",
+  ROLE: "role",
 };
 
 export default COLLECTION;

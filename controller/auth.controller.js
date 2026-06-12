@@ -10,13 +10,13 @@ import authSchema from "../model/authSchema.model.js";
 import {
   findUserByPhone,
   generateNewTokens,
-  generateRefreshToken,
-  generateToken,
   hashPassword,
   rotateRefreshToken,
   createTokens,
   verifyPassword,
   verifyRefreshToken,
+  getRoleId,
+  createUser,
 } from "../service/auth.service.js";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
@@ -37,10 +37,12 @@ const signup = async function (req, res) {
     const hashedPassword = await hashPassword(user.password);
     user.password = hashedPassword;
 
+    const roleId = await getRoleId(user.role);
+    user.roleId = roleId;
     // create new user
-    const newUser = await mdb.collection(`${user.role}s`).insertOne(user);
+    const response = createUser(user);
 
-    successResponse(res, 200, "User created successfully", newUser);
+    successResponse(res, 200, "User created successfully", response);
   } catch (error) {
     return errorResponse(res, 500, error.message);
   }
@@ -56,6 +58,7 @@ const login = async function (req, res) {
     }
 
     const isMatch = await verifyPassword(password, existingUser.password);
+
     if (!isMatch) {
       return errorResponse(
         res,
@@ -85,6 +88,7 @@ const login = async function (req, res) {
 const refreshToken = async function (req, res) {
   try {
     const incomingRefreshToken = req.cookies[REFRESH_TOKEN];
+
     if (!incomingRefreshToken) {
       return errorResponse(res, 400, "refresh token not found ");
     }
