@@ -39,8 +39,9 @@ const signup = async function (req, res) {
 
     const roleId = await getRoleId(user.role);
     user.roleId = roleId;
+
     // create new user
-    const response = createUser(user);
+    const response = await createUser(user);
 
     successResponse(res, 200, "User created successfully", response);
   } catch (error) {
@@ -71,6 +72,7 @@ const login = async function (req, res) {
     const payload = {
       phoneNumber,
       role,
+      roleId: existingUser.roleId,
       _id: existingUser._id,
     };
     const { AccessToken, refreshToken } = await createTokens(payload);
@@ -112,4 +114,5 @@ const refreshToken = async function (req, res) {
     return errorResponse(res, 500, error.message);
   }
 };
+
 export { signup, login, refreshToken };

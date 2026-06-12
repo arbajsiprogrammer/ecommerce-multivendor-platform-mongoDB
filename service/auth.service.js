@@ -10,14 +10,13 @@ import {
 import logger from "./log.service.js";
 import { mdb } from "../util/db.util.js";
 import { errorResponse } from "../helper/response.helper.js";
-import {
-  deleteRefreshToken,
-  generateToken,
-  getRefreshToken,
-  storeRefreshToken,
-} from "../helper/auth.helper.js";
+import { generateRefreshToken, generateToken } from "../helper/auth.helper.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
-import { findOne, insertOne } from "../repository/auth.repository.js";
+import {
+  deleteOne,
+  findOne,
+  insertOne,
+} from "../repository/auth.repository.js";
 
 dotenv.config();
 
@@ -87,7 +86,7 @@ const findUserByPhone = async (role, phoneNumber) => {
 
       existingUser = await findOne(collectionName, fields);
     } else {
-      const collectionName = COLLECTION.COLLECTION.CUSTOMER;
+      const collectionName = COLLECTION.CUSTOMER;
       const fields = { phoneNumber };
 
       existingUser = await findOne(collectionName, fields);
@@ -169,6 +168,60 @@ const createUser = async (user) => {
     throw new Error(error.message);
   }
 };
+
+const deleteRefreshToken = async (user) => {
+  const fields = { userId: user._id, sessionId: user.sessionId };
+  const deleteResponse = await deleteOne(COLLECTION.REFRESH_TOKEN, fields);
+
+  logger.info("token deleted from DB ", JSON.stringify(deleteResponse));
+};
+
+const getRefreshToken = async (user) => {
+  // get token from DB
+  const collectionName = COLLECTION.REFRESH_TOKEN;
+  const fields = { sessionId: user.sessionId, userId: new ObjectId(user._id) };
+
+  const dbRefreshToken = await findOne(collectionName, fields);
+
+  //   check expiry
+  if (dbRefreshToken.expiresAt < new Date()) {
+    // delete expired token
+    const collectionName = COLLECTION.REFRESH_TOKEN;
+    const fields = { userId: user._id, sessionId: user.sessionId };
+    const deleteResponse = await deleteOne(collectionName, fields);
+
+    throw new Error("refresh token expired...");
+  }
+
+  return dbRefreshToken;
+};
+
+const storeRefreshToken = async function (payload, refreshToken) {
+  // hashing refresh token
+  const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+  // storing refresh token in DB
+  const refreshTokenObject = {
+    sessionId: payload.sessionId,
+    userId: payload._id,
+    token: hashedRefreshToken,
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+  };
+
+  const response = await insertOne(
+    COLLECTION.REFRESH_TOKEN,
+    refreshTokenObject,
+  );
+
+  if (response) {
+    logger.info(`refresh token stored in DB ${JSON.stringify(response)}`);
+  } else {
+    throw new Error(
+      ` failed to store refresh token in DB ${JSON.stringify(response)}`,
+    );
+  }
+};
+
 export {
   verifyToken,
   verifyRefreshToken,
@@ -180,4 +233,7 @@ export {
   rotateRefreshToken,
   getRoleId,
   createUser,
+  deleteRefreshToken,
+  getRefreshToken,
+  storeRefreshToken,
 };

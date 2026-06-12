@@ -6,8 +6,6 @@ import { ROLES } from "../Constants/userRole.constant.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 import authSchema from "../model/authSchema.model.js";
 import {
-  generateRefreshToken,
-  generateToken,
   hashPassword,
   verifyPassword,
   verifyRefreshToken,

@@ -12,7 +12,7 @@ const insertOne = async (collectionName, data) => {
 const findOne = async (collectionName, fields) => {
   const response = await mdb.collection(collectionName).findOne(fields);
   if (!response) {
-    throw new Error("Refresh token not found in DB");
+    throw new Error("data not found in DB for fields ", JSON.stringify(fields));
   }
   return response;
 };
