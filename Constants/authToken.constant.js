@@ -2,7 +2,7 @@ const ACCESS_TOKEN = "access-token";
 
 const REFRESH_TOKEN = "refresh-token";
 
-const ACCESS_TOKEN_EXPIRY = "10m";
+const ACCESS_TOKEN_EXPIRY = "1d";
 
 const REFRESH_TOKEN_EXPIRY = "7d";
 
@@ -10,7 +10,7 @@ const ACCESS_TOKEN_EXPIRY_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "strict",
-  maxAge: 1000 * 60, // 10 minutes
+  maxAge: 1000 * 60 * 60 * 24, // 10 minutes
 };
 
 const REFRESH_TOKEN_EXPIRY_OPTIONS = {

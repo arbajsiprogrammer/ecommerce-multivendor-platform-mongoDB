@@ -136,9 +136,7 @@ const rotateRefreshToken = async (user, refreshToken) => {
 
 const getRoleId = async (role) => {
   try {
-    const response = await mdb
-      .collection(COLLECTION.ROLE)
-      .findOne({ roleName: role });
+    const response = await findOne(COLLECTION.ROLE, { roleName: role });
 
     const roleId = response._id;
     return roleId;

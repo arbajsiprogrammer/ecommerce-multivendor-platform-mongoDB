@@ -7,9 +7,12 @@ import {
   getProduct,
   updateProduct,
 } from "../controller/product.controller.js";
+import skuRouter from "../route/sku.route.js";
 import { validateProduct } from "../middleware/product.middleware.js";
 
 const router = express.Router();
+
+router.use("/:productId/sku", skuRouter);
 
 router.get("/", verifyAuthToken, getAllProducts);
 router.get("/:productId", verifyAuthToken, getProduct);

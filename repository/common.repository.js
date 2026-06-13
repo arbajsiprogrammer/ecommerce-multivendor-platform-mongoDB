@@ -3,7 +3,9 @@ import { mdb } from "../util/db.util.js";
 
 const insertOne = async (collectionName, data) => {
   try {
-    const response = await mdb.collection(collectionName).insertOne(data);
+    const response = await mdb
+      .collection(collectionName)
+      .insertOne({ ...data });
     return response;
   } catch (error) {
     throw new Error(error);
@@ -11,7 +13,7 @@ const insertOne = async (collectionName, data) => {
 };
 
 const findOne = async (collectionName, fields) => {
-  const response = await mdb.collection(collectionName).findOne(fields);
+  const response = await mdb.collection(collectionName).findOne({ ...fields });
 
   if (!response) {
     throw new Error(
@@ -22,7 +24,12 @@ const findOne = async (collectionName, fields) => {
 };
 
 const find = async (collectionName, fields = {}) => {
-  const response = await mdb.collection(collectionName).find(fields).toArray();
+  const response = await mdb
+    .collection(collectionName)
+    .find({ ...fields })
+    .toArray();
+
+  console.log("response in find repository ", response);
 
   if (response.length == 0) {
     throw new Error(
@@ -33,7 +40,9 @@ const find = async (collectionName, fields = {}) => {
 };
 
 const deleteOne = async (collectionName, fields) => {
-  const response = await mdb.collection(collectionName).deleteOne(fields);
+  const response = await mdb
+    .collection(collectionName)
+    .deleteOne({ ...fields });
 
   return response;
 };
@@ -41,7 +50,9 @@ const deleteOne = async (collectionName, fields) => {
 const deleteById = async (collectionName, fields) => {
   fields._id = new ObjectId(fields._id);
 
-  const response = await mdb.collection(collectionName).deleteOne(fields);
+  const response = await mdb
+    .collection(collectionName)
+    .deleteOne({ ...fields });
 
   return response;
 };
@@ -52,7 +63,7 @@ const findById = async (collectionName, fields) => {
   }
   fields._id = new ObjectId(fields._id);
 
-  const response = await mdb.collection(collectionName).findOne(fields);
+  const response = await mdb.collection(collectionName).findOne({ ...fields });
 
   if (!response) {
     throw new Error(
@@ -64,9 +75,12 @@ const findById = async (collectionName, fields) => {
 };
 
 const updateOne = async (collectionName, findFields, setFields) => {
-  const response = await mdb.collection(collectionName).updateOne(findFields, {
-    $set: setFields,
-  });
+  const response = await mdb.collection(collectionName).updateOne(
+    { ...findFields },
+    {
+      $set: { ...setFields },
+    },
+  );
   return response;
 };
 export { findOne, insertOne, deleteOne, findById, deleteById, find, updateOne };

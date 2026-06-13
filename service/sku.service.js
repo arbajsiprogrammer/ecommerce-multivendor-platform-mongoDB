@@ -11,9 +11,12 @@ import {
   updateSkuHelper,
 } from "../helper/sku.helper.js";
 import { updateProductSku } from "../repository/sku.repository.js";
+import logger from "./log.service.js";
 
 const getSkuService = async (productId, skuId = null) => {
-  const product = await findOne({ _id: new ObjectId(productId) });
+  const product = await findOne(COLLECTION.PRODUCT, {
+    _id: new ObjectId(productId),
+  });
 
   const productSku = product.productSkuses;
 
@@ -34,10 +37,14 @@ const addSkuService = async (SkuData, user, productId) => {
 
   const existingProduct = await getExistingProduct(vendorId, productId);
 
-  existingProduct[0].productSkuses.push(product);
+  existingProduct[0].productSkuses.push(SkuData);
   const { ...newProduct } = existingProduct[0];
 
-  const response = await updateOne(COLLECTION.PRODUCT, newProduct);
+  const response = await updateOne(
+    COLLECTION.PRODUCT,
+    { _id: new ObjectId(productId) },
+    newProduct,
+  );
 
   return response;
 };
@@ -50,7 +57,9 @@ const updateSkuService = async (productSku, vendorId, productId, skuId) => {
 
     const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const updatedSkus = updateSkuHelper(existingProduct);
+    const updatedSkus = updateSkuHelper(existingProduct, skuId, productSku);
+
+    logger.info(`updatedSkus : ${JSON.stringify(updatedSkus)}`);
 
     const response = await updateProductSku(updatedSkus, productId);
 
@@ -63,7 +72,7 @@ const updateSkuService = async (productSku, vendorId, productId, skuId) => {
 const deleteSkuService = async (vendorId, skuId, productId) => {
   const existingProduct = await getExistingProduct(vendorId, productId);
 
-  const updateProductSkus = deleteSkuHelper(existingProduct);
+  const updateProductSkus = deleteSkuHelper(existingProduct, skuId);
 
   const response = updateProductSku(updateProductSkus, productId);
   return response;
@@ -80,7 +89,7 @@ const addImageService = async (body, params, user) => {
 
     const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const updatedSkus = addImageHelper(existingProduct);
+    const updatedSkus = addImageHelper(existingProduct, skuId, imgId, imageUrl);
 
     const response = updateProductSku(updatedSkus, productId);
 
@@ -90,7 +99,7 @@ const addImageService = async (body, params, user) => {
   }
 };
 
-const getImageService = async (body, params, user) => {
+const getImageService = async (params, user) => {
   try {
     const productId = params.productId;
     const skuId = params.skuId;
@@ -98,14 +107,14 @@ const getImageService = async (body, params, user) => {
 
     const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const images = getImageHelper(existingProduct);
+    const images = getImageHelper(existingProduct, skuId);
     return images;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-const deleteImageService = async (body, params, user) => {
+const deleteImageService = async (params, user) => {
   try {
     const productId = params.productId;
     const skuId = params.skuId;
@@ -114,9 +123,10 @@ const deleteImageService = async (body, params, user) => {
 
     const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const updatedSkus = deleteImageHelper(existingProduct);
+    const updatedSkus = deleteImageHelper(existingProduct, skuId, imageId);
 
     const response = await updateOne(
+      COLLECTION.PRODUCT,
       { _id: new ObjectId(productId) },
       { productSkuses: updatedSkus },
     );

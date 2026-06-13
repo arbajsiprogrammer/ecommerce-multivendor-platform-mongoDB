@@ -31,15 +31,22 @@ const addProductService = async (product, user) => {
 };
 
 const getProductService = async (fields) => {
+  console.log("fields : ", fields);
   const response = await find(COLLECTION.PRODUCT, fields);
   return response;
 };
 
-const deleteProductService = async (productId) => {
-  const products = await deleteOne(COLLECTION.PRODUCT, { _id: productId });
+const deleteProductService = async (userId, productId) => {
+  const existingProduct = await getExistingProduct(userId, productId);
+
+  const products = await deleteOne(COLLECTION.PRODUCT, {
+    _id: new ObjectId(productId),
+  });
   return products;
 };
-const updateProductService = async (productId, product) => {
+const updateProductService = async (vendorId, productId, product) => {
+  const existingProducts = await getExistingProduct(vendorId, productId);
+
   const response = await updateOne(
     COLLECTION.PRODUCT,
     { _id: new ObjectId(productId) },

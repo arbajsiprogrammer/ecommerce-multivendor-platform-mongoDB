@@ -1,6 +1,7 @@
-const deleteImageHelper = (existingProduct) => {
+import logger from "../service/log.service.js";
+
+const deleteImageHelper = (existingProduct, skuId, imageId) => {
   const tempSku = existingProduct[0].productSkuses;
-  const sku = tempSku.filter((sku) => sku.id == skuId);
 
   const updatedSkus = tempSku.map((sku) => {
     if (sku.id == skuId) {
@@ -13,15 +14,19 @@ const deleteImageHelper = (existingProduct) => {
   return updatedSkus;
 };
 
-const getImageHelper = (existingProduct) => {
+const getImageHelper = (existingProduct, skuId) => {
   const tempSku = existingProduct[0].productSkuses;
-
+  console.log(tempSku, "tempSku");
   const sku = tempSku.filter((sku) => sku.id == skuId);
-  const images = sku[0].images;
+  console.log(sku, "sku");
+  if (sku.length == 0) {
+    throw new Error("sku not found with id ", skuId);
+  }
+  const images = sku[0]?.images;
   return images;
 };
 
-const addImageHelper = (existingProduct) => {
+const addImageHelper = (existingProduct, skuId, imgId, imageUrl) => {
   try {
     const tempSku = existingProduct[0].productSkuses;
 
@@ -34,15 +39,16 @@ const addImageHelper = (existingProduct) => {
       }
       return sku;
     });
+    return updatedSkus;
   } catch (error) {
     throw new Error(error);
   }
 };
-const deleteSkuHelper = (existingProduct) => {
+const deleteSkuHelper = (existingProduct, skuId) => {
   try {
     const tempSku = existingProduct[0].productSkuses;
 
-    const updateProductSkus = tempSkus.filter((sku) => sku.id != skuId);
+    const updateProductSkus = tempSku.filter((sku) => sku.id != skuId);
 
     return updateProductSkus;
   } catch (error) {
@@ -50,9 +56,10 @@ const deleteSkuHelper = (existingProduct) => {
   }
 };
 
-const updateSkuHelper = (existingProduct) => {
+const updateSkuHelper = (existingProduct, skuId, productSku) => {
   const tempSkus = existingProduct[0].productSkuses;
   const updatedSkus = tempSkus.map((sku) => {
+    logger.info(`${sku.id} : ${skuId}`);
     if (sku.id == skuId) {
       return productSku;
     } else {

@@ -1,4 +1,5 @@
 import { errorResponse, successResponse } from "../helper/response.helper.js";
+import logger from "../service/log.service.js";
 import {
   addImageService,
   addSkuService,
@@ -12,7 +13,8 @@ import {
 //  product sku's
 const getAllSKU = async function (req, res) {
   try {
-    const productId = req.params.id;
+    const productId = req.params.productId;
+    console.log("productId ", productId);
 
     const sku = await getSkuService(productId);
 
@@ -26,7 +28,7 @@ const addSKU = async function (req, res) {
   try {
     const SkuData = req.body;
     const user = req.user;
-    const productId = req.params.id;
+    const productId = req.params.productId;
 
     const response = await addSkuService(SkuData, user, productId);
 
@@ -39,8 +41,9 @@ const addSKU = async function (req, res) {
 const updateSKU = async function (req, res) {
   try {
     const vendorId = req.user._id;
-    const skuId = req.query.skuId;
-    const productId = req.query.productId;
+    const skuId = req.params.skuId;
+    logger.info(`inside updated sku ${skuId}`);
+    const productId = req.params.productId;
     const productSku = req.body;
 
     const response = await updateSkuService(
@@ -59,8 +62,8 @@ const updateSKU = async function (req, res) {
 const deleteSKU = async function (req, res) {
   try {
     const vendorId = req.user._id;
-    const skuId = req.query.skuId;
-    const productId = req.query.productId;
+    const skuId = req.params.skuId;
+    const productId = req.params.productId;
 
     const response = await deleteSkuService(vendorId, skuId, productId);
 
@@ -93,7 +96,7 @@ const getImages = async function (req, res) {
 
     const response = await getImageService(params, user);
 
-    successResponse(res, 200, "Images retrieved successfully", images);
+    successResponse(res, 200, "Images retrieved successfully", response);
   } catch (error) {
     return errorResponse(res, 500, error);
   }
