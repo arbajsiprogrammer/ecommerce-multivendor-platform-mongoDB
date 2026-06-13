@@ -8,8 +8,6 @@ import authSchema from "../model/authSchema.model.js";
 import { deleteById, deleteOne } from "../repository/common.repository.js";
 import {
   deleteRefreshToken,
-  hashPassword,
-  verifyPassword,
   verifyRefreshToken,
 } from "../service/auth.service.js";
 import logger from "../service/log.service.js";

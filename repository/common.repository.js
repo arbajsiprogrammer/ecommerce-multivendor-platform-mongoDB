@@ -83,4 +83,22 @@ const updateOne = async (collectionName, findFields, setFields) => {
   );
   return response;
 };
-export { findOne, insertOne, deleteOne, findById, deleteById, find, updateOne };
+
+const aggregation = async (collectionName, stageArray) => {
+  const response = await mdb
+    .collection(collectionName)
+    .aggregate([...stageArray])
+    .toArray();
+
+  return response;
+};
+export {
+  findOne,
+  insertOne,
+  deleteOne,
+  findById,
+  deleteById,
+  find,
+  updateOne,
+  aggregation,
+};

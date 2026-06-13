@@ -9,8 +9,13 @@ import {
 } from "../Constants/authToken.constant.js";
 import logger from "./log.service.js";
 import { mdb } from "../util/db.util.js";
-import { errorResponse } from "../helper/response.helper.js";
-import { generateRefreshToken, generateToken } from "../helper/auth.helper.js";
+import {
+  generateNewTokens,
+  generateRefreshToken,
+  generateToken,
+  hashPassword,
+  verifyPassword,
+} from "../helper/auth.helper.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import {
   deleteOne,
@@ -55,26 +60,6 @@ const verifyRefreshToken = async (token) => {
     throw new Error(error);
   }
 };
-// hashing password
-const hashPassword = async function (password) {
-  try {
-    const hashed = await bcrypt.hash(password, 10);
-    console.log(hashed, "inside hash password service");
-    return hashed;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const verifyPassword = async function (password, hashed_password) {
-  try {
-    const isMatch = await bcrypt.compare(password, hashed_password);
-
-    return isMatch;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const findUserByPhone = async (role, phoneNumber) => {
   try {
@@ -114,17 +99,6 @@ const createTokens = async function (payload) {
   } catch (error) {
     throw new Error(error);
   }
-};
-
-const generateNewTokens = async (user) => {
-  const { iat, exp, ...payload } = user;
-  // generating new Access token
-  const accessToken = await generateToken(payload);
-
-  // now generating new REFRESH TOKEN
-  const refreshToken = await generateRefreshToken(payload);
-
-  return { accessToken, refreshToken };
 };
 
 const rotateRefreshToken = async (user, refreshToken) => {
@@ -214,18 +188,66 @@ const storeRefreshToken = async function (payload, refreshToken) {
   }
 };
 
+const signUpService = async (user) => {
+  // check if user exist
+  const existingUser = await findUserByPhone(user.role, user.phoneNumber);
+
+  if (existingUser) {
+    throw new Error(" User already exist...please log in ");
+  }
+  // hash password
+  user.password = await hashPassword(user.password);
+
+  // add role Id
+  user.roleId = await getRoleId(user.role);
+
+  // create new user
+  const response = await createUser(user);
+};
+
+const loginService = async (body) => {
+  const { phoneNumber, password, role } = body;
+
+  const existingUser = await findUserByPhone(role, phoneNumber);
+
+  if (!existingUser) {
+    throw new Error("Invalid credentials...user not found");
+  }
+
+  const isMatch = await verifyPassword(password, existingUser.password);
+
+  const payload = {
+    phoneNumber,
+    role,
+    roleId: existingUser.roleId,
+    _id: existingUser._id,
+  };
+  const tokens = await createTokens(payload);
+  return tokens;
+};
+
+const refreshTokenService = async (incomingRefreshToken) => {
+  const user = await verifyRefreshToken(incomingRefreshToken);
+
+  // now generating access token
+  const tokens = await generateNewTokens(user);
+  return tokens;
+
+  //Refresh Token Rotation
+  await rotateRefreshToken(user, refreshToken);
+};
 export {
   verifyToken,
   verifyRefreshToken,
-  hashPassword,
-  verifyPassword,
   findUserByPhone,
   createTokens,
-  generateNewTokens,
   rotateRefreshToken,
   getRoleId,
   createUser,
   deleteRefreshToken,
   getRefreshToken,
   storeRefreshToken,
+  signUpService,
+  loginService,
+  refreshTokenService,
 };

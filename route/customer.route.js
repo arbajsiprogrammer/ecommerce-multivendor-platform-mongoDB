@@ -24,8 +24,8 @@ router.get("/products/:id", verifyAuthToken, validateCustomerRole, getProduct);
 // get products by category
 router.get(
   "/categories/:id/products",
-  validateCustomerRole,
   verifyAuthToken,
+  validateCustomerRole,
   getProductsByCategory,
 );
 

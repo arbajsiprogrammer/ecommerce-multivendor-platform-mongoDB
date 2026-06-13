@@ -13,6 +13,6 @@ router.post("/signup", validateSignup, validateRole, signup);
 
 router.post("/login", validateRole, login);
 
-router.get("/refresh-token", refreshToken);
+router.post("/refresh-token", refreshToken);
 
 export default router;

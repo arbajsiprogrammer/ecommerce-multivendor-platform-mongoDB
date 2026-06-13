@@ -16,11 +16,11 @@ const generateToken = async (payload) => {
   const accessToken = await jwt.sign(payload, secretKey, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
   });
-  console.log("accessToken ", accessToken);
+
   if (!accessToken) {
     throw new Error("Access Token generation failed");
   }
-  logger.info("Token generation successful");
+
   return accessToken;
 };
 
@@ -34,9 +34,46 @@ const generateRefreshToken = async (payload) => {
   if (!refreshToken) {
     throw new Error("Refresh token generation failed");
   }
-  logger.info(`Refresh token generation successful`);
 
   return refreshToken;
 };
 
-export { generateToken, generateRefreshToken };
+// hashing password
+const hashPassword = async function (password) {
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    return hashed;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const verifyPassword = async function (password, hashed_password) {
+  try {
+    const isMatch = await bcrypt.compare(password, hashed_password);
+    if (!isMatch) {
+      throw new Error("Invalid credentials...password not match");
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const generateNewTokens = async (user) => {
+  const { iat, exp, ...payload } = user;
+  // generating new Access token
+  const accessToken = await generateToken(payload);
+
+  // now generating new REFRESH TOKEN
+  const refreshToken = await generateRefreshToken(payload);
+
+  return { accessToken, refreshToken };
+};
+export {
+  generateToken,
+  generateRefreshToken,
+  hashPassword,
+  verifyPassword,
+  generateNewTokens,
+};
