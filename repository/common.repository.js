@@ -63,4 +63,10 @@ const findById = async (collectionName, fields) => {
   return response;
 };
 
-export { findOne, insertOne, deleteOne, findById, deleteById, find };
+const updateOne = async (collectionName, findFields, setFields) => {
+  const response = await mdb.collection(collectionName).updateOne(findFields, {
+    $set: setFields,
+  });
+  return response;
+};
+export { findOne, insertOne, deleteOne, findById, deleteById, find, updateOne };

@@ -176,4 +176,37 @@ const getAllOrders = async function (req, res) {
     errorResponse(res, 500, error);
   }
 };
-export { addItemToOrder, getAllOrders, getOrder };
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    const orderTracksId = req.body.id || Date.now().toString();
+    const remarks = req.body.remarks;
+    const status = req.body.status;
+
+    const existingOrder = await getExistingOrders(orderId);
+    const newOrderTracks = existingOrder.orderTracks;
+
+    const newRecord = {
+      id: orderTracksId,
+      remarks,
+      orderStatus: status,
+    };
+    newOrderTracks.push(newRecord);
+
+    const response = await mdb.collection(COLLECTION.ORDER).updateOne(
+      { _id: new ObjectId(orderId) },
+      {
+        $set: {
+          orderTracks: newOrderTracks,
+        },
+      },
+    );
+
+    successResponse(res, 200, "Order status updated successfully", response);
+  } catch (error) {
+    errorResponse(res, 500, error);
+  }
+};
+export { addItemToOrder, getAllOrders, getOrder, updateOrderStatus };

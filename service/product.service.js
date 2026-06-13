@@ -1,0 +1,57 @@
+import { ObjectId } from "mongodb";
+import { mdb } from "../util/db.util.js";
+import COLLECTION from "../Constants/collectionName.constant.js";
+import {
+  deleteOne,
+  find,
+  findOne,
+  insertOne,
+  updateOne,
+} from "../repository/common.repository.js";
+
+const getExistingProduct = async (vendorId, productId) => {
+  const existingProduct = await find(COLLECTION.PRODUCT, {
+    vendorId: vendorId,
+    _id: new ObjectId(productId),
+  });
+
+  if (existingProduct.length == 0) {
+    throw new Error("product not found");
+  }
+
+  return existingProduct;
+};
+
+const addProductService = async (product, user) => {
+  const response = await insertOne(COLLECTION.PRODUCT, {
+    vendorId: user._id,
+    ...product,
+  });
+  return response;
+};
+
+const getProductService = async (fields) => {
+  const response = await find(COLLECTION.PRODUCT, fields);
+  return response;
+};
+
+const deleteProductService = async (productId) => {
+  const products = await deleteOne(COLLECTION.PRODUCT, { _id: productId });
+  return products;
+};
+const updateProductService = async (productId, product) => {
+  const response = await updateOne(
+    COLLECTION.PRODUCT,
+    { _id: new ObjectId(productId) },
+    product,
+  );
+  return response;
+};
+
+export {
+  getExistingProduct,
+  addProductService,
+  getProductService,
+  deleteProductService,
+  updateProductService,
+};
