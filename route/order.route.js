@@ -15,5 +15,7 @@ router.post("/", verifyAuthToken, addItemToOrder);
 router.get("/", verifyAuthToken, getAllOrders);
 
 router.get("/:id", verifyAuthToken, getOrder);
-router.post("/:id", verifyAuthToken, validateVendorRole, updateOrderStatus);
+
+router.patch("/:id", verifyAuthToken, validateVendorRole, updateOrderStatus);
+
 export default router;

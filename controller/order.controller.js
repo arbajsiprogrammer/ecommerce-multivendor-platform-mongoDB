@@ -2,7 +2,10 @@ import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import mongoose from "mongoose";
-import { getAllOrdersService } from "../service/order.service.js";
+import {
+  getAllOrdersService,
+  updateOrderStatusService,
+} from "../service/order.service.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
 
 // add item to order
@@ -179,30 +182,7 @@ const getAllOrders = async function (req, res) {
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const orderId = req.params.id;
-
-    const orderTracksId = req.body.id || Date.now().toString();
-    const remarks = req.body.remarks;
-    const status = req.body.status;
-
-    const existingOrder = await getExistingOrders(orderId);
-    const newOrderTracks = existingOrder.orderTracks;
-
-    const newRecord = {
-      id: orderTracksId,
-      remarks,
-      orderStatus: status,
-    };
-    newOrderTracks.push(newRecord);
-
-    const response = await mdb.collection(COLLECTION.ORDER).updateOne(
-      { _id: new ObjectId(orderId) },
-      {
-        $set: {
-          orderTracks: newOrderTracks,
-        },
-      },
-    );
+    const response = await updateOrderStatusService(req.body, req.params);
 
     successResponse(res, 200, "Order status updated successfully", response);
   } catch (error) {

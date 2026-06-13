@@ -11,7 +11,7 @@ router.use("/products", verifyAuthToken, validateVendorRole, productRouter);
 
 router.get("/", verifyAuthToken, validateVendorRole, getAllVendors);
 
-// router.use("/orders");
+router.use("/orders", orderRouter);
 
 // update product status
 
