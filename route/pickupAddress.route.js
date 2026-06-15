@@ -10,19 +10,9 @@ import { validateVendorRole } from "../middleware/vendor.middleware.js";
 
 const router = express.Router();
 
-router.get("/pickup", verifyAuthToken, validateVendorRole, getPickupAddress);
-router.post("/pickup", verifyAuthToken, validateVendorRole, addPickupAddress);
-router.put(
-  "/pickup/:id",
-  verifyAuthToken,
-  validateVendorRole,
-  updatePickupAddress,
-);
-router.delete(
-  "/pickup/:id",
-  verifyAuthToken,
-  validateVendorRole,
-  deletePickupAddress,
-);
+router.get("/", verifyAuthToken, validateVendorRole, getPickupAddress);
+router.post("/", verifyAuthToken, validateVendorRole, addPickupAddress);
+router.put("/:id", verifyAuthToken, validateVendorRole, updatePickupAddress);
+router.delete("/:id", verifyAuthToken, validateVendorRole, deletePickupAddress);
 
 export default router;

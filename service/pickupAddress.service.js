@@ -1,7 +1,7 @@
 import {
-  removePickupAddress,
-  updatePickupAddressHelper,
-  validatePickupAddressExists,
+  removeAddress,
+  updateAddressHelper,
+  validateAddressExists,
 } from "../helper/address.helper.js";
 import {
   getVendorByIdRepository,
@@ -11,12 +11,12 @@ import {
 const addPickupAddressService = async (user, body) => {
   const address = {
     ...body,
-    id: body.id || crypto.randomUUID(),
+    id: crypto.randomUUID(),
   };
+  const vendorId = user._id;
+  const vendor = await getVendorByIdRepository(vendorId);
 
-  const vendor = await getVendorByIdRepository(user);
-
-  const pickupAddresses = [...vendor.pickupAddresses, address];
+  const pickupAddresses = [...vendor.addresses, address];
 
   const response = await updatePickupAddressesRepository(
     vendorId,
@@ -26,10 +26,11 @@ const addPickupAddressService = async (user, body) => {
   return response;
 };
 
-const getPickupAddressService = async (vendorId) => {
+const getPickupAddressService = async (user) => {
+  const vendorId = user._id;
   const vendor = await getVendorByIdRepository(vendorId);
 
-  return vendor.pickupAddresses || [];
+  return vendor.addresses || [];
 };
 
 const updatePickupAddressService = async (
@@ -39,10 +40,10 @@ const updatePickupAddressService = async (
 ) => {
   const vendor = await getVendorByIdRepository(vendorId);
 
-  validatePickupAddressExists(vendor.pickupAddresses, pickupAddressId);
+  validateAddressExists(vendor.addresses, pickupAddressId);
 
-  const updatedAddresses = updatePickupAddressHelper(
-    vendor.pickupAddresses,
+  const updatedAddresses = updateAddressHelper(
+    vendor.addresses,
     pickupAddressId,
     addressData,
   );
@@ -57,12 +58,9 @@ const updatePickupAddressService = async (
 const deletePickupAddressService = async (vendorId, pickupAddressId) => {
   const vendor = await getVendorByIdRepository(vendorId);
 
-  validatePickupAddressExists(vendor.pickupAddresses, pickupAddressId);
+  validateAddressExists(vendor.addresses, pickupAddressId);
 
-  const updatedAddresses = removePickupAddress(
-    vendor.pickupAddresses,
-    pickupAddressId,
-  );
+  const updatedAddresses = removeAddress(vendor.addresses, pickupAddressId);
 
   const response = await updatePickupAddressesRepository(
     vendorId,

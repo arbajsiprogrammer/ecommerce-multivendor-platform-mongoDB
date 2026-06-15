@@ -31,7 +31,6 @@ const addProductService = async (product, user) => {
 };
 
 const getProductService = async (fields) => {
-  console.log("fields : ", fields);
   const response = await find(COLLECTION.PRODUCT, fields);
   return response;
 };

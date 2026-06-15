@@ -1,12 +1,12 @@
 import {
-  removeDeliveryAddress,
-  updateDeliveryAddressHelper,
-  validateDeliveryAddressExists,
+  removeAddress,
+  updateAddressHelper,
+  validateAddressExists,
 } from "../helper/address.helper.js";
 import {
   getCustomerByIdRepository,
   updateDeliveryAddressesRepository,
-} from "../repository/DeliveryAddress.repository.js";
+} from "../repository/deliveryAddress.repository.js";
 
 const addDeliveryAddressService = async (user, body) => {
   const CustomerId = user._id;
@@ -17,8 +17,9 @@ const addDeliveryAddressService = async (user, body) => {
   };
 
   const Customer = await getCustomerByIdRepository(CustomerId);
-
-  const DeliveryAddresses = [...Customer.DeliveryAddresses, address];
+  console.log(Customer);
+  //   const existingAddress = Customer.addresses || [];
+  const DeliveryAddresses = [...Customer.addresses, address];
 
   const response = await updateDeliveryAddressesRepository(
     CustomerId,
@@ -31,7 +32,7 @@ const addDeliveryAddressService = async (user, body) => {
 const getDeliveryAddressService = async (CustomerId) => {
   const Customer = await getCustomerByIdRepository(CustomerId);
 
-  return Customer.DeliveryAddresses || [];
+  return Customer.addresses || [];
 };
 
 const updateDeliveryAddressService = async (
@@ -41,10 +42,10 @@ const updateDeliveryAddressService = async (
 ) => {
   const Customer = await getCustomerByIdRepository(CustomerId);
 
-  validateDeliveryAddressExists(Customer.DeliveryAddresses, DeliveryAddressId);
+  validateAddressExists(Customer.addresses, DeliveryAddressId);
 
-  const updatedAddresses = updateDeliveryAddressHelper(
-    Customer.DeliveryAddresses,
+  const updatedAddresses = updateAddressHelper(
+    Customer.addresses,
     DeliveryAddressId,
     addressData,
   );
@@ -59,12 +60,9 @@ const updateDeliveryAddressService = async (
 const deleteDeliveryAddressService = async (CustomerId, DeliveryAddressId) => {
   const Customer = await getCustomerByIdRepository(CustomerId);
 
-  validateDeliveryAddressExists(Customer.DeliveryAddresses, DeliveryAddressId);
+  validateAddressExists(Customer.addresses, DeliveryAddressId);
 
-  const updatedAddresses = removeDeliveryAddress(
-    Customer.DeliveryAddresses,
-    DeliveryAddressId,
-  );
+  const updatedAddresses = removeAddress(Customer.addresses, DeliveryAddressId);
 
   const response = await updateDeliveryAddressesRepository(
     CustomerId,

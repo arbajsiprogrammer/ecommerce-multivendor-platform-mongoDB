@@ -4,33 +4,23 @@ import {
   deleteDeliveryAddress,
   getDeliveryAddress,
   updateDeliveryAddress,
-} from "../controller/address.controller.js";
+} from "../controller/deliveryAddress.controller.js";
 import { verifyAuthToken } from "../middleware/auth.middleware.js";
 
 import { validateCustomerRole } from "../middleware/customer.middleware.js";
 
 const router = express.Router();
 
-router.get(
-  "/delivery",
-  verifyAuthToken,
-  validateCustomerRole,
-  getDeliveryAddress,
-);
-router.post(
-  "/delivery",
-  verifyAuthToken,
-  validateCustomerRole,
-  addDeliveryAddress,
-);
+router.get("/", verifyAuthToken, validateCustomerRole, getDeliveryAddress);
+router.post("/", verifyAuthToken, validateCustomerRole, addDeliveryAddress);
 router.put(
-  "/delivery/:id",
+  "/:id",
   verifyAuthToken,
   validateCustomerRole,
   updateDeliveryAddress,
 );
 router.delete(
-  "/delivery/:id",
+  "/:id",
   verifyAuthToken,
   validateCustomerRole,
   deleteDeliveryAddress,

@@ -1,23 +1,22 @@
-import { findById } from "./common.repository.js";
+import { ObjectId } from "mongodb";
+import COLLECTION from "../Constants/collectionName.constant.js";
+import { findOne, updateOne } from "./common.repository.js";
 
 const getCustomerByIdRepository = async (CustomerId) => {
-  const response = await findById(COLLECTION.Customer, {
-    _id: CustomerId,
+  const response = await findOne(COLLECTION.CUSTOMER, {
+    _id: new ObjectId(CustomerId),
   });
   return response;
 };
 
-const updateDeliveryAddressesRepository = async (
-  CustomerId,
-  DeliveryAddresses,
-) => {
+const updateDeliveryAddressesRepository = async (CustomerId, addresses) => {
   const response = await updateOne(
-    COLLECTION.Customer,
+    COLLECTION.CUSTOMER,
     {
       _id: new ObjectId(CustomerId),
     },
     {
-      DeliveryAddresses,
+      addresses,
     },
   );
   return response;

@@ -2,6 +2,7 @@ import { errorResponse, successResponse } from "../helper/response.helper.js";
 import {
   addPickupAddressService,
   deletePickupAddressService,
+  getPickupAddressService,
   updatePickupAddressService,
 } from "../service/pickupAddress.service.js";
 
@@ -18,7 +19,7 @@ const addPickupAddress = async (req, res) => {
 
 const getPickupAddress = async (req, res) => {
   try {
-    const pickupAddresses = await getPickupAddressService(req.user._id);
+    const pickupAddresses = await getPickupAddressService(req.user);
 
     successResponse(
       res,

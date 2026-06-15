@@ -2,8 +2,9 @@ import { errorResponse, successResponse } from "../helper/response.helper.js";
 import {
   addDeliveryAddressService,
   deleteDeliveryAddressService,
+  getDeliveryAddressService,
   updateDeliveryAddressService,
-} from "../service/DeliveryAddress.service.js";
+} from "../service/deliveryAddress.service.js";
 
 // add Delivery address
 const addDeliveryAddress = async (req, res) => {

@@ -1,10 +1,6 @@
-const updatePickupAddressHelper = (
-  pickupAddresses,
-  pickupAddressId,
-  addressData,
-) => {
-  const updatedPickupAddresses = pickupAddresses.map((address) => {
-    if (address.id == pickupAddressId) {
+const updateAddressHelper = (addresses, addressId, addressData) => {
+  const updatedAddresses = addresses.map((address) => {
+    if (address.id == addressId) {
       return {
         ...address,
         ...addressData,
@@ -12,25 +8,19 @@ const updatePickupAddressHelper = (
     } else return address;
   });
 
-  return updatedPickupAddresses;
+  return updatedAddresses;
 };
 
-const validatePickupAddressExists = (pickupAddresses, pickupAddressId) => {
-  const exists = pickupAddresses.some(
-    (address) => address.id === pickupAddressId,
-  );
+const validateAddressExists = (addresses, addressId) => {
+  const exists = addresses.some((address) => address.id == addressId);
 
   if (!exists) {
-    throw new Error("Pickup address not found");
+    throw new Error("  address not found");
   }
 };
 
-const removePickupAddress = (pickupAddresses, pickupAddressId) => {
-  return pickupAddresses.filter((address) => address.id !== pickupAddressId);
+const removeAddress = (addresses, addressId) => {
+  return addresses.filter((address) => address.id !== addressId);
 };
 
-export {
-  updatePickupAddressHelper,
-  validatePickupAddressExists,
-  removePickupAddress,
-};
+export { updateAddressHelper, validateAddressExists, removeAddress };

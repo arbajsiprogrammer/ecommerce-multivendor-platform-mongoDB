@@ -1,20 +1,22 @@
-import { findById } from "./common.repository.js";
+import { ObjectId } from "mongodb";
+import COLLECTION from "../Constants/collectionName.constant.js";
+import { findOne, updateOne } from "./common.repository.js";
 
 const getVendorByIdRepository = async (vendorId) => {
-  const response = await findById(COLLECTION.VENDOR, {
-    _id: vendorId,
+  const response = await findOne(COLLECTION.PLATFORM_USER, {
+    _id: new ObjectId(vendorId),
   });
   return response;
 };
 
-const updatePickupAddressesRepository = async (vendorId, pickupAddresses) => {
+const updatePickupAddressesRepository = async (vendorId, addresses) => {
   const response = await updateOne(
-    COLLECTION.VENDOR,
+    COLLECTION.PLATFORM_USER,
     {
       _id: new ObjectId(vendorId),
     },
     {
-      pickupAddresses,
+      addresses,
     },
   );
   return response;

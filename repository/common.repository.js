@@ -29,8 +29,6 @@ const find = async (collectionName, fields = {}) => {
     .find({ ...fields })
     .toArray();
 
-  console.log("response in find repository ", response);
-
   if (response.length == 0) {
     throw new Error(
       `data not found in DB for fields ${JSON.stringify(fields)}`,
