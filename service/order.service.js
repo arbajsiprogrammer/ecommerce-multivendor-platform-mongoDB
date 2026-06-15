@@ -3,6 +3,7 @@ import COLLECTION from "../Constants/collectionName.constant.js";
 import { validateCartItem } from "../helper/cart.helper.js";
 import {
   createOrderObject,
+  getSku,
   updateOrderStatusHelper,
   validateCart,
 } from "../helper/order.helper.js";
@@ -11,10 +12,11 @@ import { getCart } from "../repository/cart.repository.js";
 import { find, findOne, updateOne } from "../repository/common.repository.js";
 import {
   createOrderRepository,
+  deleteCartRepository,
   getAllOrdersRepository,
   getOrderRepository,
 } from "../repository/order.repository.js";
-import { getSkuService } from "./sku.service.js";
+import mongoose from "mongoose";
 
 const getExistingOrders = async (orderId) => {
   const existingOrder = await findOne(COLLECTION.ORDER, orderId);
@@ -64,7 +66,7 @@ const createOrderService = async (customerId, cartId) => {
     session.startTransaction();
 
     const cart = await getCart(customerId);
-
+    console.log("cart", cart);
     validateCart(cart);
 
     const orderItems = await createOrderItems(cart.cartItems);
@@ -96,8 +98,10 @@ const createOrderItems = async (cartItems) => {
     const product = await findOne(COLLECTION.PRODUCT, {
       _id: new ObjectId(item.productId),
     });
+    console.log("product ", product);
 
-    const sku = getSkuService(product, item.productSkuId);
+    const sku = getSku(product.productSkuses, item.productSkuId);
+    console.log("sku ", sku);
 
     orderItems.push({
       id,

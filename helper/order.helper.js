@@ -60,10 +60,15 @@ const calculateDeliveryCharges = (totalAmount) => {
   } else return 0;
 };
 
+const getSku = (skuArray, skuId) => {
+  const existingSku = skuArray.filter((sku) => sku.id == skuId);
+  return existingSku[0];
+};
 export {
   updateOrderStatusHelper,
   validateCart,
   createOrderObject,
   calculateTotalAmount,
   calculateDeliveryCharges,
+  getSku,
 };
