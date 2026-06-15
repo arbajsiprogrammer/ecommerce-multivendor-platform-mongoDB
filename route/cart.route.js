@@ -15,8 +15,8 @@ router.get("/:cartItemId", verifyAuthToken, validateCustomerRole, getCartItem);
 router.get("/", verifyAuthToken, validateCustomerRole, getCartProducts);
 router.post(
   "/items/:productId/:skuId",
-  validateCustomerRole,
   verifyAuthToken,
+  validateCustomerRole,
   addToCart,
 );
 router.put(

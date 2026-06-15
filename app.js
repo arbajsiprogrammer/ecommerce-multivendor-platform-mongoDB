@@ -13,7 +13,7 @@ import { createRoles } from "./util/role.util.js";
 const app = express();
 
 app.use(cors(cors_options));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
 // mounting routes

@@ -68,6 +68,34 @@ const updateSkuHelper = (existingProduct, skuId, productSku) => {
   });
   return updatedSkus;
 };
+// const checkStockHelper = (productSku) => {
+//   if (productSku.availableStock < quantity || !productSku.availabilityStatus) {
+//     throw new Error(
+//       "Product is out of stock or quantity is grater than available stock ",
+//     );
+//   }
+//   return true;
+// };
+// const addToCartHelper = (existingCart, productId, skuId) => {
+//   // check if quantity is grater than the available stock or if product is out of stock
+
+//   checkStockHelper(productSku);
+
+//   // if current product sku is already exist
+//   isSkuExistHelper();
+//   let existingProductSku;
+//   if (existingCart.cartItems && existingCart.cartItems.length > 0) {
+//     existingProductSku = existingCart.cartItems.filter(
+//       (item) => item.productSkusId == skuId,
+//     );
+//   }
+
+//   if (existingProductSku && existingProductSku.length > 0) {
+//     throw new Error("Product is already in cart");
+//   }
+
+//   return true;
+// };
 export {
   deleteImageHelper,
   getImageHelper,

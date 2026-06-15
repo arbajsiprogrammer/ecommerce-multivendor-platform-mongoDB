@@ -22,7 +22,7 @@ const getSkuService = async (productId, skuId = null) => {
 
   if (skuId) {
     const sku = productSku.filter((sku) => skuId == sku.id);
-    return sku;
+    return sku[0];
   }
 
   return productSku;
