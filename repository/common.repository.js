@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mdb } from "../util/db.util.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const insertOne = async (collectionName, data) => {
   try {
@@ -30,7 +31,8 @@ const find = async (collectionName, fields = {}) => {
     .toArray();
 
   if (response.length == 0) {
-    throw new Error(
+    throw new ApiError(
+      404,
       `data not found in DB for fields ${JSON.stringify(fields)}`,
     );
   }

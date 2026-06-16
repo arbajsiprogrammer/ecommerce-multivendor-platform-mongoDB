@@ -4,6 +4,8 @@ import { ACCESS_TOKEN } from "../Constants/authToken.constant.js";
 import authSchema from "../model/authSchema.model.js";
 import { errorResponse } from "../helper/response.helper.js";
 import { ROLES } from "../Constants/userRole.constant.js";
+import { ApiError } from "../util/ApiError.util.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 const verifyAuthToken = async (req, res, next) => {
   try {
@@ -58,21 +60,17 @@ const validateSignup = async (req, res, next) => {
   }
 };
 
-const validateRole = async (req, res, next) => {
-  try {
-    const user = req.user || req.body;
+const validateRole = asyncHandler(async (req, res, next) => {
+  const user = req.user || req.body;
 
-    // check if role is valid or not
-    const validRole = ROLES.includes(user.role);
+  // check if role is valid or not
+  const validRole = ROLES.includes(user.role);
 
-    if (!validRole) {
-      return errorResponse(res, 400, "Invalid role");
-    }
-
-    next();
-  } catch (error) {
-    return errorResponse(res, 500, error);
+  if (!validRole) {
+    throw new ApiError(400, "Invalid role");
   }
-};
+
+  next();
+});
 
 export { verifyAuthToken, validateRole, validateSignup };

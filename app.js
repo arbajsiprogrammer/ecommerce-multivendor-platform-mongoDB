@@ -9,6 +9,7 @@ import apiRoute from "./route/api.route.js";
 import cors_options from "./service/cors.service.js";
 import { errorResponse } from "./helper/response.helper.js";
 import { createRoles } from "./util/role.util.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -33,9 +34,7 @@ app.use((req, res) => {
 });
 
 // global error handler
-app.use((error, req, res, next) => {
-  return errorResponse(res, 500, error || "internal server error ");
-});
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
 

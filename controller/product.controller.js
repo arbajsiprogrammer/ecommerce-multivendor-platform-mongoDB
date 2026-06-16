@@ -8,6 +8,7 @@ import {
   getProductService,
   updateProductService,
 } from "../service/product.service.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 // products API's
 const addProduct = async function (req, res) {
@@ -36,7 +37,7 @@ const getAllProducts = async function (req, res) {
   }
 };
 
-const getProduct = async function (req, res) {
+const getProduct = async function (req, res, next) {
   try {
     const id = req.user._id;
     const productId = req.params.productId;
@@ -48,7 +49,7 @@ const getProduct = async function (req, res) {
 
     successResponse(res, 200, "product fetch successfully", products);
   } catch (error) {
-    return errorResponse(res, 500, error);
+    next(error);
   }
 };
 

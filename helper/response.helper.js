@@ -1,4 +1,6 @@
 import logger from "../service/log.service.js";
+import { ApiError } from "../util/ApiError.util.js";
+import { ApiResponse } from "../util/ApiResponse.util.js";
 
 const successResponse = function (res, statusCode, message, data) {
   logger.info(
@@ -9,12 +11,16 @@ const successResponse = function (res, statusCode, message, data) {
       data: data,
     }),
   );
-  return res.status(statusCode).json({
-    success: true,
-    statusCode: statusCode,
-    message: message,
-    data: data,
-  });
+  // return res.status(statusCode).json({
+  //   success: true,
+  //   statusCode: statusCode,
+  //   message: message,
+  //   data: data,
+  // });
+
+  return res
+    .status(statusCode)
+    .json(new ApiResponse(statusCode, message, data));
 };
 
 const errorResponse = function (res, statusCode, error) {
@@ -22,7 +28,7 @@ const errorResponse = function (res, statusCode, error) {
     JSON.stringify({
       success: false,
       statusCode: statusCode,
-      message: error.message || error,
+      message: error?.message || error,
       stack: error.stack,
       data: null,
     }),
