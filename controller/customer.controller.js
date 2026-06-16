@@ -9,6 +9,7 @@ import {
   getProductsByCategoryService,
   getProductsByPageService,
 } from "../service/customer.service.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 const getAllProducts = asyncHandler(async function (req, res) {
   const products = await getAllProductsService(req.user);

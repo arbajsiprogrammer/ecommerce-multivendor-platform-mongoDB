@@ -1,4 +1,4 @@
-import { ApiError } from "../util/ApiError.util";
+import { ApiError } from "../util/ApiError.util.js";
 
 const updateOrderStatusHelper = (existingOrder) => {
   const newRecord = {

@@ -104,10 +104,8 @@ const createOrderItems = async (cartItems) => {
     const product = await findOne(COLLECTION.PRODUCT, {
       _id: new ObjectId(item.productId),
     });
-    console.log("product ", product);
 
     const sku = getSku(product.productSkuses, item.productSkuId);
-    console.log("sku ", sku);
 
     orderItems.push({
       id,

@@ -8,6 +8,7 @@ import {
   getPaymentService,
 } from "../service/payment.service.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 const addPayment = asyncHandler(async (req, res) => {
   const response = await addPaymentService(req.user._id, req.body);
 

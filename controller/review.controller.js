@@ -6,6 +6,7 @@ import {
   getAllReviewsService,
 } from "../service/review.service.js";
 import { successResponse } from "../helper/response.helper.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 const addReview = asyncHandler(async (req, res) => {
   const response = await addReviewService(req.user._id, req.body);

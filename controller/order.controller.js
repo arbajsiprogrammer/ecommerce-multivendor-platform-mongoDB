@@ -9,6 +9,7 @@ import {
   updateOrderStatusService,
 } from "../service/order.service.js";
 import { successResponse } from "../helper/response.helper.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 // add item to order
 const addItemToOrder = asyncHandler(async (req, res) => {

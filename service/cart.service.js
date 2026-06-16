@@ -76,6 +76,7 @@ const addToCartService = async (user, body, params) => {
   };
 
   cart.cartItems.push(cartItem);
+
   const response = await addItemToCartRepository(customerId, cart.cartItems);
   return response;
 };

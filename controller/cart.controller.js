@@ -15,6 +15,7 @@ import {
   updateCartItemService,
   validateAddToCart,
 } from "../service/cart.service.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 // GET cart items of a cart
 const getCartProducts = asyncHandler(async function (req, res) {
