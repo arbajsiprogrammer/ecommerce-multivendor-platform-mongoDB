@@ -10,64 +10,44 @@ import {
   getProductsByPageService,
 } from "../service/customer.service.js";
 
-const getAllProducts = async function (req, res) {
-  try {
-    const products = await getAllProductsService(req.user);
+const getAllProducts = asyncHandler(async function (req, res) {
+  const products = await getAllProductsService(req.user);
 
-    successResponse(res, 200, "fetched product successfully", products);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "fetched product successfully", products);
+});
 
-const getProduct = async function (req, res) {
-  try {
-    // showing only one product
-    const products = await getAllProductService(req.params);
+const getProduct = asyncHandler(async function (req, res) {
+  // showing only one product
+  const products = await getAllProductService(req.params);
 
-    successResponse(res, 200, "fetched product successfully", products);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "fetched product successfully", products);
+});
 
 // get record by category
-const getProductsByCategory = async function (req, res) {
-  try {
-    const categoryId = req.params.id;
-    const products = await getProductsByCategoryService(categoryId);
+const getProductsByCategory = asyncHandler(async function (req, res) {
+  const categoryId = req.params.id;
+  const products = await getProductsByCategoryService(categoryId);
 
-    successResponse(
-      res,
-      200,
-      "fetched product by category successfully",
-      products,
-    );
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(
+    res,
+    200,
+    "fetched product by category successfully",
+    products,
+  );
+});
 
 // Pagination
-const getProductsByPage = async function (req, res) {
-  try {
-    const products = await getProductsByPageService(req.query);
+const getProductsByPage = asyncHandler(async function (req, res) {
+  const products = await getProductsByPageService(req.query);
 
-    successResponse(res, 200, "fetched products", products);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "fetched products", products);
+});
 
 // customers
-const getAllCustomers = async function (req, res) {
-  try {
-    const customers = await getAllCustomersService();
-    successResponse(res, 200, "customers data fetched", customers);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+const getAllCustomers = asyncHandler(async function (req, res) {
+  const customers = await getAllCustomersService();
+  successResponse(res, 200, "customers data fetched", customers);
+});
 export {
   getAllProducts,
   getProduct,

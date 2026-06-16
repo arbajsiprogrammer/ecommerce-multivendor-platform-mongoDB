@@ -1,4 +1,5 @@
 import logger from "../service/log.service.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const deleteImageHelper = (existingProduct, skuId, imageId) => {
   const tempSku = existingProduct[0].productSkuses;
@@ -20,40 +21,32 @@ const getImageHelper = (existingProduct, skuId) => {
   const sku = tempSku.filter((sku) => sku.id == skuId);
   console.log(sku, "sku");
   if (sku.length == 0) {
-    throw new Error("sku not found with id ", skuId);
+    throw new ApiError(400, "sku not found with id ", skuId);
   }
   const images = sku[0]?.images;
   return images;
 };
 
 const addImageHelper = (existingProduct, skuId, imgId, imageUrl) => {
-  try {
-    const tempSku = existingProduct[0].productSkuses;
+  const tempSku = existingProduct[0].productSkuses;
 
-    const updatedSkus = tempSku.map((sku) => {
-      if (sku.id == skuId) {
-        sku.images.push({
-          id: imgId,
-          imageUrl,
-        });
-      }
-      return sku;
-    });
-    return updatedSkus;
-  } catch (error) {
-    throw new Error(error);
-  }
+  const updatedSkus = tempSku.map((sku) => {
+    if (sku.id == skuId) {
+      sku.images.push({
+        id: imgId,
+        imageUrl,
+      });
+    }
+    return sku;
+  });
+  return updatedSkus;
 };
 const deleteSkuHelper = (existingProduct, skuId) => {
-  try {
-    const tempSku = existingProduct[0].productSkuses;
+  const tempSku = existingProduct[0].productSkuses;
 
-    const updateProductSkus = tempSku.filter((sku) => sku.id != skuId);
+  const updateProductSkus = tempSku.filter((sku) => sku.id != skuId);
 
-    return updateProductSkus;
-  } catch (error) {
-    throw new Error(error);
-  }
+  return updateProductSkus;
 };
 
 const updateSkuHelper = (existingProduct, skuId, productSku) => {

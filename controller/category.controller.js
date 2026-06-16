@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import logger from "../service/log.service.js";
 import { db, mdb } from "../util/db.util.js";
 import COLLECTION from "../Constants/collectionName.constant.js";
-import { errorResponse, successResponse } from "../helper/response.helper.js";
+import { successResponse } from "../helper/response.helper.js";
 import {
   addCategoryService,
   deleteCategoryService,
@@ -13,73 +13,54 @@ import {
 } from "../service/category.service.js";
 import { find, findById, findOne } from "../repository/common.repository.js";
 import { findByName } from "../repository/category.repository.js";
+import { asyncHandler } from "../util/asyncHandler.util.js";
 
 // categories
-const getAllCategories = async function (req, res) {
-  try {
-    const categories = await getCategoriesService();
+const getAllCategories = asyncHandler(async function (req, res) {
+  const categories = await getCategoriesService();
 
-    successResponse(res, 200, "categories fetched successfully", categories);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "categories fetched successfully", categories);
+});
 
-const getCategory = async function (req, res) {
-  try {
-    const categoryId = req.params.categoryId;
-    const category = await getCategoryService(categoryId);
+const getCategory = asyncHandler(async function (req, res) {
+  const categoryId = req.params.categoryId;
+  const category = await getCategoryService(categoryId);
 
-    successResponse(res, 200, "category fetched successfully", category);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "category fetched successfully", category);
+});
 
-const updateCategory = async function (req, res) {
-  try {
-    const category = req.body;
-    const categoryId = req.params.categoryId;
+const updateCategory = asyncHandler(async function (req, res) {
+  const category = req.body;
+  const categoryId = req.params.categoryId;
 
-    // check if Category exist or not
-    const existingCategory = await isCategoryExist(categoryId);
+  // check if Category exist or not
+  const existingCategory = await isCategoryExist(categoryId);
 
-    const response = await updateCategoryService(existingCategory, category);
+  const response = await updateCategoryService(existingCategory, category);
 
-    successResponse(
-      res,
-      200,
-      `category updated successfully with id: ${categoryId}`,
-      response,
-    );
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(
+    res,
+    200,
+    `category updated successfully with id: ${categoryId}`,
+    response,
+  );
+});
 
-const addCategory = async function (req, res) {
-  try {
-    const category = req.body;
+const addCategory = asyncHandler(async function (req, res) {
+  const category = req.body;
 
-    const response = await addCategoryService(category);
+  const response = await addCategoryService(category);
 
-    successResponse(res, 200, "category added successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "category added successfully", response);
+});
 
-const deleteCategory = async function (req, res) {
-  try {
-    const categoryId = req.params.categoryId;
+const deleteCategory = asyncHandler(async function (req, res) {
+  const categoryId = req.params.categoryId;
 
-    const response = await deleteCategoryService(categoryId);
+  const response = await deleteCategoryService(categoryId);
 
-    successResponse(res, 200, "category deleted ", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "category deleted ", response);
+});
 
 export {
   getAllCategories,

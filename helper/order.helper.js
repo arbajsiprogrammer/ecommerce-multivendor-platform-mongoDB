@@ -1,3 +1,5 @@
+import { ApiError } from "../util/ApiError.util";
+
 const updateOrderStatusHelper = (existingOrder) => {
   const newRecord = {
     id: orderTracksId,
@@ -11,11 +13,11 @@ const updateOrderStatusHelper = (existingOrder) => {
 
 const validateCart = (cart) => {
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new ApiError(404, "Cart not found");
   }
 
   if (cart.cartItems.length === 0) {
-    throw new Error("Cart is empty");
+    throw new ApiError(400, "Cart is empty");
   }
 };
 

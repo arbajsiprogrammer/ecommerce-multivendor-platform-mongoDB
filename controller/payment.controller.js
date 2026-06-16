@@ -8,35 +8,23 @@ import {
   getPaymentService,
 } from "../service/payment.service.js";
 import { errorResponse, successResponse } from "../helper/response.helper.js";
-const addPayment = async (req, res) => {
-  try {
-    const response = await addPaymentService(req.user._id, req.body);
+const addPayment = asyncHandler(async (req, res) => {
+  const response = await addPaymentService(req.user._id, req.body);
 
-    successResponse(res, 200, "Payment added successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Payment added successfully", response);
+});
 
-const getPayment = async (req, res) => {
-  try {
-    const payment = await getPaymentService(req.params.paymentId);
+const getPayment = asyncHandler(async (req, res) => {
+  const payment = await getPaymentService(req.params.paymentId);
 
-    successResponse(res, 200, "Payment fetched successfully", payment);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Payment fetched successfully", payment);
+});
 
 // payments
-const getAllPayments = async function (req, res) {
-  try {
-    const payments = await getAllPaymentsService();
+const getAllPayments = asyncHandler(async function (req, res) {
+  const payments = await getAllPaymentsService();
 
-    successResponse(res, 200, "payments data fetched", payments);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "payments data fetched", payments);
+});
 
 export { getPayment, addPayment, getAllPayments };

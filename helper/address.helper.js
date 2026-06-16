@@ -1,3 +1,5 @@
+import { ApiError } from "../util/ApiError.util";
+
 const updateAddressHelper = (addresses, addressId, addressData) => {
   const updatedAddresses = addresses.map((address) => {
     if (address.id == addressId) {
@@ -15,7 +17,7 @@ const validateAddressExists = (addresses, addressId) => {
   const exists = addresses.some((address) => address.id == addressId);
 
   if (!exists) {
-    throw new Error("  address not found");
+    throw new ApiError(400, "address not found");
   }
 };
 

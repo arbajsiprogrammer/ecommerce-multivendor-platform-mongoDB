@@ -3,8 +3,8 @@ import COLLECTION from "../Constants/collectionName.constant.js";
 import { find, findOne } from "./common.repository.js";
 import { mdb } from "../util/db.util.js";
 
-const getAllOrdersRepository = async (customerId) => {
-  const response = await find(COLLECTION.ORDER, { customerId });
+const getAllOrdersRepository = async (field) => {
+  const response = await find(COLLECTION.ORDER, { ...field });
   return response;
 };
 

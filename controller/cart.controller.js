@@ -17,68 +17,44 @@ import {
 } from "../service/cart.service.js";
 
 // GET cart items of a cart
-const getCartProducts = async function (req, res) {
-  try {
-    const customerId = req.user._id;
+const getCartProducts = asyncHandler(async function (req, res) {
+  const customerId = req.user._id;
 
-    const cartItems = await getCartProductService(customerId);
-    console.log("cartItems", cartItems);
-    successResponse(res, 200, "cart items fetched successfully", cartItems);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  const cartItems = await getCartProductService(customerId);
+  console.log("cartItems", cartItems);
+  successResponse(res, 200, "cart items fetched successfully", cartItems);
+});
 
 // get single cart item
-const getCartItem = async function (req, res) {
-  try {
-    const customerId = req.user._id;
-    const cartItemId = req.params.cartItemId;
+const getCartItem = asyncHandler(async function (req, res) {
+  const customerId = req.user._id;
+  const cartItemId = req.params.cartItemId;
 
-    const cartItems = await getCartProductService(customerId, cartItemId);
+  const cartItems = await getCartProductService(customerId, cartItemId);
 
-    return res.status(200).json({ cartItems });
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  return res.status(200).json({ cartItems });
+});
 
 // add to cart
-const addToCart = async (req, res) => {
-  try {
-    const cart = await addToCartService(req.user, req.body, req.params);
+const addToCart = asyncHandler(async (req, res) => {
+  const cart = await addToCartService(req.user, req.body, req.params);
 
-    successResponse(res, 200, "Product added to cart", cart);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Product added to cart", cart);
+});
 
 // update cart item
-const updateCartItems = async (req, res) => {
-  try {
-    const response = await updateCartItemService(
-      req.user,
-      req.params,
-      req.body,
-    );
+const updateCartItems = asyncHandler(async (req, res) => {
+  const response = await updateCartItemService(req.user, req.params, req.body);
 
-    successResponse(res, 200, "Cart item updated successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Cart item updated successfully", response);
+});
 
 // delete cart item
-const deleteCartItems = async (req, res) => {
-  try {
-    const response = await deleteCartItemService(req.user, req.params);
+const deleteCartItems = asyncHandler(async (req, res) => {
+  const response = await deleteCartItemService(req.user, req.params);
 
-    successResponse(res, 200, "Cart item deleted successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Cart item deleted successfully", response);
+});
 
 export {
   getCartProducts,

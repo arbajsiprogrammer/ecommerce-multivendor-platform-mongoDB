@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import { find, aggregation } from "../repository/common.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getAllCustomersService = async () => {
   const response = await find(COLLECTION.CUSTOMER, {});
@@ -29,7 +30,7 @@ const getAllProductService = async (params) => {
 
 const getProductsByCategoryService = async (categoryId) => {
   if (!categoryId) {
-    throw new Error(`Category ID not provided in request`);
+    throw new ApiError(400, `Category ID not provided in request`);
   }
 
   const products = await find(COLLECTION.PRODUCT, {

@@ -3,27 +3,21 @@ import { mdb } from "../util/db.util.js";
 import { ApiError } from "../util/ApiError.util.js";
 
 const insertOne = async (collectionName, data) => {
-  try {
-    const response = await mdb
-      .collection(collectionName)
-      .insertOne({ ...data });
-    return response;
-  } catch (error) {
-    throw new Error(error);
-  }
+  const response = await mdb.collection(collectionName).insertOne({ ...data });
+  return response;
 };
 
 const findOne = async (collectionName, fields) => {
   const response = await mdb.collection(collectionName).findOne({ ...fields });
 
   if (!response) {
-    throw new Error(
+    throw new ApiError(
+      400,
       `data not found in DB for fields ${JSON.stringify(fields)}`,
     );
   }
   return response;
 };
-
 const find = async (collectionName, fields = {}) => {
   const response = await mdb
     .collection(collectionName)
@@ -47,6 +41,14 @@ const deleteOne = async (collectionName, fields) => {
   return response;
 };
 
+const deleteMany = async (collectionName, fields) => {
+  const response = await mdb
+    .collection(collectionName)
+    .deleteMany({ ...fields });
+
+  return response;
+};
+
 const deleteById = async (collectionName, fields) => {
   fields._id = new ObjectId(fields._id);
 
@@ -59,14 +61,15 @@ const deleteById = async (collectionName, fields) => {
 
 const findById = async (collectionName, fields) => {
   if (!fields || !fields._id) {
-    throw new Error("please provide valid Id");
+    throw new ApiError(401, "please provide valid Id");
   }
   fields._id = new ObjectId(fields._id);
 
   const response = await mdb.collection(collectionName).findOne({ ...fields });
 
   if (!response) {
-    throw new Error(
+    throw new ApiError(
+      400,
       `data not found in DB for fields ${JSON.stringify(fields)}`,
     );
   }
@@ -92,6 +95,7 @@ const aggregation = async (collectionName, stageArray) => {
 
   return response;
 };
+
 export {
   findOne,
   insertOne,
@@ -101,4 +105,5 @@ export {
   find,
   updateOne,
   aggregation,
+  deleteMany,
 };

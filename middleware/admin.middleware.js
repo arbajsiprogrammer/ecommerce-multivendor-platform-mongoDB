@@ -1,18 +1,15 @@
 import { errorResponse } from "../helper/response.helper.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const checkRole = async (req, res, next) => {
-  try {
-    const role = req.user.role;
-    const authRole = "admin";
+  const role = req.user.role;
+  const authRole = "admin";
 
-    if (role != authRole) {
-      errorResponse(res, 400, "user must be admin to access categories");
-    }
-
-    next();
-  } catch (error) {
-    errorResponse(res, 500, error);
+  if (role != authRole) {
+    throw new ApiError(400, "user must be admin to access categories");
   }
+
+  next();
 };
 
 export { checkRole };

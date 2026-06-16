@@ -13,6 +13,7 @@ import {
   generateNewTokens,
   generateRefreshToken,
   generateToken,
+  getCollectionName,
   hashPassword,
   verifyPassword,
 } from "../helper/auth.helper.js";
@@ -22,83 +23,53 @@ import {
   findOne,
   insertOne,
 } from "../repository/common.repository.js";
-import { getCollectionName } from "./userProfile.service.js";
 import { ObjectId } from "mongodb";
+import { findUserByPhone } from "../repository/auth.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 dotenv.config();
 
 const verifyToken = async (token) => {
-  try {
-    const secretKey = process.env.JWT_SECRET_KEY;
-    const user = await jwt.verify(token, secretKey);
-    return user;
-  } catch (error) {
-    console.log("******Error************ : ", error);
-  }
+  const secretKey = process.env.JWT_SECRET_KEY;
+  const user = await jwt.verify(token, secretKey);
+  return user;
 };
 
 const verifyRefreshToken = async (token) => {
-  try {
-    const refreshSecretKey = process.env.JWT_REFRESH_SECRET_KEY;
-    const user = await jwt.verify(token, refreshSecretKey);
+  const refreshSecretKey = process.env.JWT_REFRESH_SECRET_KEY;
+  const user = await jwt.verify(token, refreshSecretKey);
 
-    if (!user) {
-      throw new Error("refresh token verification failed");
-    }
-
-    // get token from DB
-    const dbRefreshToken = await getRefreshToken(user);
-
-    const isMatch = await bcrypt.compare(token, dbRefreshToken.token);
-
-    if (!isMatch) {
-      throw new Error("Refresh token not matched");
-    }
-
-    return user;
-  } catch (error) {
-    throw new Error(error);
+  if (!user) {
+    throw new ApiError(401, "refresh token verification failed");
   }
-};
 
-const findUserByPhone = async (role, phoneNumber) => {
-  try {
-    // check if user is already exist or not
-    const name = getCollectionName(role);
+  // get token from DB
+  const dbRefreshToken = await getRefreshToken(user);
 
-    const fields = { phoneNumber };
+  const isMatch = await bcrypt.compare(token, dbRefreshToken.token);
 
-    const existingUser = await findOne(name, fields);
-
-    logger.warn(
-      `existing user in findUserByPhone ${JSON.stringify(existingUser)}`,
-    );
-
-    return existingUser;
-  } catch (error) {
-    logger.error(`internal server error.... ${error}`);
+  if (!isMatch) {
+    throw new ApiError(401, "Refresh token not matched");
   }
+
+  return user;
 };
 
 const createTokens = async function (payload) {
-  try {
-    // access token
-    const accessToken = await generateToken(payload);
+  // access token
+  const accessToken = await generateToken(payload);
 
-    // generating universal unique ID for identifying refresh token from db
-    const sessionId = crypto.randomUUID();
-    payload = { sessionId, ...payload };
+  // generating universal unique ID for identifying refresh token from db
+  const sessionId = crypto.randomUUID();
+  payload = { sessionId, ...payload };
 
-    // generating refresh token
-    const refreshToken = await generateRefreshToken(payload);
+  // generating refresh token
+  const refreshToken = await generateRefreshToken(payload);
 
-    // store refresh token into DB
-    await storeRefreshToken(payload, refreshToken);
+  // store refresh token into DB
+  await storeRefreshToken(payload, refreshToken);
 
-    return { accessToken, refreshToken };
-  } catch (error) {
-    throw new Error(error);
-  }
+  return { accessToken, refreshToken };
 };
 
 const rotateRefreshToken = async (user, refreshToken) => {
@@ -109,29 +80,21 @@ const rotateRefreshToken = async (user, refreshToken) => {
 };
 
 const getRoleId = async (role) => {
-  try {
-    const response = await findOne(COLLECTION.ROLE, { roleName: role });
+  const response = await findOne(COLLECTION.ROLE, { roleName: role });
 
-    const roleId = response._id;
-    return roleId;
-  } catch (error) {
-    throw new Error(error);
-  }
+  const roleId = response._id;
+  return roleId;
 };
 
 const createUser = async (user) => {
-  try {
-    const role = user.role;
+  const role = user.role;
 
-    if (role == "admin" || role == "vendor") {
-      const response = insertOne(COLLECTION.PLATFORM_USER, user);
-      return response;
-    } else {
-      const response = insertOne(COLLECTION.CUSTOMER, user);
-      return response;
-    }
-  } catch (error) {
-    throw new Error(error);
+  if (role == "admin" || role == "vendor") {
+    const response = insertOne(COLLECTION.PLATFORM_USER, user);
+    return response;
+  } else {
+    const response = insertOne(COLLECTION.CUSTOMER, user);
+    return response;
   }
 };
 
@@ -156,7 +119,7 @@ const getRefreshToken = async (user) => {
     const fields = { userId: user._id, sessionId: user.sessionId };
     const deleteResponse = await deleteOne(collectionName, fields);
 
-    throw new Error("refresh token expired...");
+    throw new ApiError(401, "refresh token expired...");
   }
 
   return dbRefreshToken;
@@ -182,7 +145,8 @@ const storeRefreshToken = async function (payload, refreshToken) {
   if (response) {
     logger.info(`refresh token stored in DB ${JSON.stringify(response)}`);
   } else {
-    throw new Error(
+    throw new ApiError(
+      401,
       ` failed to store refresh token in DB ${JSON.stringify(response)}`,
     );
   }
@@ -190,10 +154,12 @@ const storeRefreshToken = async function (payload, refreshToken) {
 
 const signUpService = async (user) => {
   // check if user exist
-  const existingUser = await findUserByPhone(user.role, user.phoneNumber);
+  const collectionName = getCollectionName(user.role);
+
+  const existingUser = await findUserByPhone(collectionName, user.phoneNumber);
 
   if (existingUser) {
-    throw new Error(" User already exist...please log in ");
+    throw new ApiError(400, "User already exist...please log in");
   }
   // hash password
   user.password = await hashPassword(user.password);
@@ -203,15 +169,18 @@ const signUpService = async (user) => {
 
   // create new user
   const response = await createUser(user);
+  return response;
 };
 
 const loginService = async (body) => {
   const { phoneNumber, password, role } = body;
 
-  const existingUser = await findUserByPhone(role, phoneNumber);
+  const collectionName = getCollectionName(role);
+
+  const existingUser = await findUserByPhone(collectionName, phoneNumber);
 
   if (!existingUser) {
-    throw new Error("Invalid credentials...user not found");
+    throw new ApiError(401, "Invalid credentials...user not found");
   }
 
   const isMatch = await verifyPassword(password, existingUser.password);
@@ -236,10 +205,10 @@ const refreshTokenService = async (incomingRefreshToken) => {
   //Refresh Token Rotation
   await rotateRefreshToken(user, refreshToken);
 };
+
 export {
   verifyToken,
   verifyRefreshToken,
-  findUserByPhone,
   createTokens,
   rotateRefreshToken,
   getRoleId,

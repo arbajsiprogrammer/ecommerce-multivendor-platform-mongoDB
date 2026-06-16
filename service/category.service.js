@@ -10,6 +10,7 @@ import {
   findByName,
   updateCategoryById,
 } from "../repository/category.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const isCategoryExist = async (categoryId) => {
   const existingCategory = await findById(COLLECTION.CATEGORY, {
@@ -28,7 +29,10 @@ const addCategoryService = async (category) => {
   const existingCategory = await findByName(category.categoryName);
 
   if (existingCategory) {
-    throw new Error(`category with name ${category.categoryName} found`);
+    throw new ApiError(
+      400,
+      `category with name ${category.categoryName} found`,
+    );
   }
 
   const response = await insertOne(COLLECTION.CATEGORY, category);

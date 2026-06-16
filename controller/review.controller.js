@@ -5,25 +5,18 @@ import {
   addReviewService,
   getAllReviewsService,
 } from "../service/review.service.js";
-import { errorResponse, successResponse } from "../helper/response.helper.js";
-const addReview = async (req, res) => {
-  try {
-    const response = await addReviewService(req.user._id, req.body);
+import { successResponse } from "../helper/response.helper.js";
 
-    successResponse(res, 200, "Review added successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+const addReview = asyncHandler(async (req, res) => {
+  const response = await addReviewService(req.user._id, req.body);
 
-const getAllReviews = async (req, res) => {
-  try {
-    const reviews = await getAllReviewsService(req.params.productId);
+  successResponse(res, 200, "Review added successfully", response);
+});
 
-    successResponse(res, 200, "Reviews fetched successfully", reviews);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+const getAllReviews = asyncHandler(async (req, res) => {
+  const reviews = await getAllReviewsService(req.params.productId);
+
+  successResponse(res, 200, "Reviews fetched successfully", reviews);
+});
 
 export { addReview, getAllReviews };

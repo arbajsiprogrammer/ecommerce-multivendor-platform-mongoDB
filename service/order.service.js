@@ -17,17 +17,23 @@ import {
   getOrderRepository,
 } from "../repository/order.repository.js";
 import mongoose from "mongoose";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getExistingOrders = async (orderId) => {
   const existingOrder = await findOne(COLLECTION.ORDER, orderId);
 
   if (!existingOrder) {
-    throw new Error("Order not found");
+    throw new ApiError(400, "Order not found");
   }
 };
 
-const getAllOrdersService = async (customerId) => {
-  const orders = await getAllOrdersRepository(customerId);
+const getAllOrdersService = async (user) => {
+  let orders;
+  if (user.role == "admin") {
+    orders = await getAllOrdersRepository({});
+  } else {
+    orders = await getAllOrdersRepository({ customerId });
+  }
 
   return orders;
 };

@@ -6,7 +6,6 @@ import {
   validateCartItemExists,
   validateStock,
 } from "../helper/cart.helper.js";
-import { errorResponse } from "../helper/response.helper.js";
 import {
   addItemToCartRepository,
   deleteCartItemRepository,

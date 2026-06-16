@@ -8,6 +8,7 @@ import {
   insertOne,
   updateOne,
 } from "../repository/common.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getExistingProduct = async (vendorId, productId) => {
   const existingProduct = await find(COLLECTION.PRODUCT, {
@@ -16,7 +17,7 @@ const getExistingProduct = async (vendorId, productId) => {
   });
 
   if (existingProduct.length == 0) {
-    throw new Error("product not found");
+    throw new ApiError(400, "product not found");
   }
 
   return existingProduct;

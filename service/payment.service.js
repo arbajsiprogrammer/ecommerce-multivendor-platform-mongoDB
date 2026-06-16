@@ -11,6 +11,7 @@ import {
   getPaymentByOrderId,
   getPaymentRepository,
 } from "../repository/payment.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getAllPaymentsService = async () => {
   const response = await find(COLLECTION.PAYMENT, {});
@@ -63,7 +64,7 @@ const validatePayment = async (orderId, totalAmount) => {
   const order = await getOrderById(orderId);
 
   if (totalAmount != order.totalAmount) {
-    throw new Error("Total amount mismatch");
+    throw new ApiError(400, "Total amount mismatch");
   }
 
   return order;
@@ -73,7 +74,7 @@ const getPaymentService = async (paymentId) => {
   const payment = await getPaymentRepository(paymentId);
 
   if (!payment) {
-    throw new Error("Payment not found");
+    throw new ApiError(400, "Payment not found");
   }
 
   return payment;

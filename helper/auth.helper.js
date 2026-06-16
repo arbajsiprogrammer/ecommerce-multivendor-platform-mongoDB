@@ -18,7 +18,7 @@ const generateToken = async (payload) => {
   });
 
   if (!accessToken) {
-    throw new Error("Access Token generation failed");
+    throw new ApiError(401, "Access Token generation failed");
   }
 
   return accessToken;
@@ -32,7 +32,7 @@ const generateRefreshToken = async (payload) => {
   });
 
   if (!refreshToken) {
-    throw new Error("Refresh token generation failed");
+    throw new ApiError(401, "Refresh token generation failed");
   }
 
   return refreshToken;
@@ -40,24 +40,16 @@ const generateRefreshToken = async (payload) => {
 
 // hashing password
 const hashPassword = async function (password) {
-  try {
-    const hashed = await bcrypt.hash(password, 10);
-    return hashed;
-  } catch (error) {
-    throw new Error(error);
-  }
+  const hashed = await bcrypt.hash(password, 10);
+  return hashed;
 };
 
 const verifyPassword = async function (password, hashed_password) {
-  try {
-    const isMatch = await bcrypt.compare(password, hashed_password);
-    if (!isMatch) {
-      throw new Error("Invalid credentials...password not match");
-    }
-    return true;
-  } catch (error) {
-    console.error(error);
+  const isMatch = await bcrypt.compare(password, hashed_password);
+  if (!isMatch) {
+    throw new ApiError(401, "Invalid credentials...password not match");
   }
+  return true;
 };
 
 const generateNewTokens = async (user) => {
@@ -70,10 +62,20 @@ const generateNewTokens = async (user) => {
 
   return { accessToken, refreshToken };
 };
+
+const getCollectionName = (role, _id) => {
+  if (role == "admin" || role == "vendor") {
+    return COLLECTION.PLATFORM_USER;
+  } else {
+    return COLLECTION.CUSTOMER;
+  }
+};
+
 export {
   generateToken,
   generateRefreshToken,
   hashPassword,
   verifyPassword,
   generateNewTokens,
+  getCollectionName,
 };

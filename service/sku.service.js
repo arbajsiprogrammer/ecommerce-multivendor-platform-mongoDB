@@ -12,6 +12,7 @@ import {
 } from "../helper/sku.helper.js";
 import { updateProductSku } from "../repository/sku.repository.js";
 import logger from "./log.service.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getSkuService = async (productId, skuId = null) => {
   const product = await findOne(COLLECTION.PRODUCT, {
@@ -32,7 +33,7 @@ const addSkuService = async (SkuData, user, productId) => {
   const vendorId = user._id;
 
   if (!SkuData) {
-    throw new Error("SkuData is missing");
+    throw new ApiError(400, "SkuData is missing");
   }
 
   const existingProduct = await getExistingProduct(vendorId, productId);
@@ -50,23 +51,19 @@ const addSkuService = async (SkuData, user, productId) => {
 };
 
 const updateSkuService = async (productSku, vendorId, productId, skuId) => {
-  try {
-    if (!productSku) {
-      throw new Error("Product SKU details missing in request body");
-    }
-
-    const existingProduct = await getExistingProduct(vendorId, productId);
-
-    const updatedSkus = updateSkuHelper(existingProduct, skuId, productSku);
-
-    logger.info(`updatedSkus : ${JSON.stringify(updatedSkus)}`);
-
-    const response = await updateProductSku(updatedSkus, productId);
-
-    return response;
-  } catch (error) {
-    throw new Error(error);
+  if (!productSku) {
+    throw new ApiError(400, "Product SKU details missing in request body");
   }
+
+  const existingProduct = await getExistingProduct(vendorId, productId);
+
+  const updatedSkus = updateSkuHelper(existingProduct, skuId, productSku);
+
+  logger.info(`updatedSkus : ${JSON.stringify(updatedSkus)}`);
+
+  const response = await updateProductSku(updatedSkus, productId);
+
+  return response;
 };
 
 const deleteSkuService = async (vendorId, skuId, productId) => {
@@ -79,62 +76,50 @@ const deleteSkuService = async (vendorId, skuId, productId) => {
 };
 
 const addImageService = async (body, params, user) => {
-  try {
-    const imageUrl = body.imageUrl;
-    const imgId = body.id || crypto.randomUUID();
+  const imageUrl = body.imageUrl;
+  const imgId = body.id || crypto.randomUUID();
 
-    const productId = params.productId;
-    const skuId = params.skuId;
-    const vendorId = user._id;
+  const productId = params.productId;
+  const skuId = params.skuId;
+  const vendorId = user._id;
 
-    const existingProduct = await getExistingProduct(vendorId, productId);
+  const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const updatedSkus = addImageHelper(existingProduct, skuId, imgId, imageUrl);
+  const updatedSkus = addImageHelper(existingProduct, skuId, imgId, imageUrl);
 
-    const response = updateProductSku(updatedSkus, productId);
+  const response = updateProductSku(updatedSkus, productId);
 
-    return response;
-  } catch (error) {
-    throw new Error(error);
-  }
+  return response;
 };
 
 const getImageService = async (params, user) => {
-  try {
-    const productId = params.productId;
-    const skuId = params.skuId;
-    const vendorId = user._id;
+  const productId = params.productId;
+  const skuId = params.skuId;
+  const vendorId = user._id;
 
-    const existingProduct = await getExistingProduct(vendorId, productId);
+  const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const images = getImageHelper(existingProduct, skuId);
-    return images;
-  } catch (error) {
-    throw new Error(error);
-  }
+  const images = getImageHelper(existingProduct, skuId);
+  return images;
 };
 
 const deleteImageService = async (params, user) => {
-  try {
-    const productId = params.productId;
-    const skuId = params.skuId;
-    const imageId = params.imageId;
-    const vendorId = user._id;
+  const productId = params.productId;
+  const skuId = params.skuId;
+  const imageId = params.imageId;
+  const vendorId = user._id;
 
-    const existingProduct = await getExistingProduct(vendorId, productId);
+  const existingProduct = await getExistingProduct(vendorId, productId);
 
-    const updatedSkus = deleteImageHelper(existingProduct, skuId, imageId);
+  const updatedSkus = deleteImageHelper(existingProduct, skuId, imageId);
 
-    const response = await updateOne(
-      COLLECTION.PRODUCT,
-      { _id: new ObjectId(productId) },
-      { productSkuses: updatedSkus },
-    );
+  const response = await updateOne(
+    COLLECTION.PRODUCT,
+    { _id: new ObjectId(productId) },
+    { productSkuses: updatedSkus },
+  );
 
-    return response;
-  } catch (error) {
-    throw new Error(error);
-  }
+  return response;
 };
 export {
   addSkuService,

@@ -1,16 +1,12 @@
-import { errorResponse } from "../helper/response.helper.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const validateCustomerRole = async (req, res, next) => {
-  try {
-    const user = req.user || req.body;
+  const user = req.user || req.body;
 
-    if (user.role != "customer") {
-      return errorResponse(res, 400, "Invalid role");
-    }
-    next();
-  } catch (error) {
-    return errorResponse(res, 500, error);
+  if (user.role != "customer") {
+    throw new ApiError(400, "Invalid role");
   }
+  next();
 };
 
 export { validateCustomerRole };

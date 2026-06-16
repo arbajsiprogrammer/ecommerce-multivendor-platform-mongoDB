@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import COLLECTION from "../Constants/collectionName.constant.js";
 import { find, findOne, insertOne } from "./common.repository.js";
+import { ApiError } from "../util/ApiError.util.js";
 
 const getOrderById = async (orderId, customerId) => {
   const response = await findOne(COLLECTION.ORDER, {
@@ -19,7 +20,7 @@ const isReviewExist = async (customerId, productId, orderId) => {
   });
 
   if (existingReview) {
-    throw new Error("Review already exists");
+    throw new ApiError(400, "Review already exists");
   }
   return false;
 };

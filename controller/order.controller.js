@@ -8,47 +8,31 @@ import {
   getOrderService,
   updateOrderStatusService,
 } from "../service/order.service.js";
-import { errorResponse, successResponse } from "../helper/response.helper.js";
+import { successResponse } from "../helper/response.helper.js";
 
 // add item to order
-const addItemToOrder = async (req, res) => {
-  try {
-    const response = await createOrderService(req.user._id, req.body.cartId);
+const addItemToOrder = asyncHandler(async (req, res) => {
+  const response = await createOrderService(req.user._id, req.body.cartId);
 
-    successResponse(res, 200, "Order created successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Order created successfully", response);
+});
 
 // get single order
-const getOrder = async (req, res) => {
-  try {
-    const order = await getOrderService(req.user._id, req.params.id);
+const getOrder = asyncHandler(async (req, res) => {
+  const order = await getOrderService(req.user._id, req.params.id);
 
-    successResponse(res, 200, "Order fetched successfully", order);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Order fetched successfully", order);
+});
 // orders
-const getAllOrders = async function (req, res) {
-  try {
-    const orders = await getAllOrdersService(req.user._id);
+const getAllOrders = asyncHandler(async function (req, res) {
+  const orders = await getAllOrdersService(req.user);
 
-    successResponse(res, 200, "orders data fetched", orders);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "orders data fetched", orders);
+});
 
-const updateOrderStatus = async (req, res) => {
-  try {
-    const response = await updateOrderStatusService(req.body, req.params);
+const updateOrderStatus = asyncHandler(async (req, res) => {
+  const response = await updateOrderStatusService(req.body, req.params);
 
-    successResponse(res, 200, "Order status updated successfully", response);
-  } catch (error) {
-    errorResponse(res, 500, error);
-  }
-};
+  successResponse(res, 200, "Order status updated successfully", response);
+});
 export { addItemToOrder, getAllOrders, getOrder, updateOrderStatus };
